@@ -1,5 +1,7 @@
 # Install Notes
 
+## Setup a new raspian install
+
 * Write raspian image to sd card from MacOS
 
     $ diskutil list
@@ -16,3 +18,41 @@
 
 * Change passwd
 
+## Install Bluez
+
+Is it already installed? Afterall, unlike the Pi 2 & 3, the Pi 3 ships with Bluetooth and WiFi
+
+    $ dpkg-query -l | grep bluez
+    ii  bluez                                 5.43-2+rpt2+deb9u2                   armhf        Bluetooth tools and daemons
+    ii  bluez-firmware                        1.2-3+rpt1                           all          Firmware for Bluetooth devices
+
+Gosh, that makes things easy.
+
+Sure, but is it active?
+
+    $ systemctl status bluetooth
+    ● bluetooth.service - Bluetooth service
+       Loaded: loaded (/lib/systemd/system/bluetooth.service; enabled; vendor preset: enabled)
+       Active: active (running) since Sat 2018-03-03 05:13:30 UTC; 16min ago
+         Docs: man:bluetoothd(8)
+     Main PID: 574 (bluetoothd)
+       Status: "Running"
+       CGroup: /system.slice/bluetooth.service
+               └─574 /usr/lib/bluetooth/bluetoothd
+    
+    Mar 03 05:13:30 prox1 systemd[1]: Starting Bluetooth service...
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Bluetooth daemon 5.43
+    Mar 03 05:13:30 prox1 systemd[1]: Started Bluetooth service.
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Starting SDP server
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Bluetooth management interface 1.14 initialized
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Failed to obtain handles for "Service Changed" characteristic
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Sap driver initialization failed.
+    Mar 03 05:13:30 prox1 bluetoothd[574]: sap-server: Operation not permitted (1)
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Endpoint registered: sender=:1.10 path=/A2DP/SBC/Source/1
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Endpoint registered: sender=:1.10 path=/A2DP/SBC/Sink/1
+
+So yes. Good.
+
+### References
+
+* https://learn.adafruit.com/install-bluez-on-the-raspberry-pi/installation
