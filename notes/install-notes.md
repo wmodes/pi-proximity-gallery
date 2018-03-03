@@ -4,9 +4,9 @@
 
 * Write raspian image to sd card from MacOS
 
-    $ diskutil list
-    $ diskutil unmount /dev/disk1s1
-    $ unzip -p 2017-11-29-raspbian-stretch.zip | sudo dd of=/dev/disk1 bs=1m
+      $ diskutil list
+      $ diskutil unmount /dev/disk1s1
+      $ unzip -p 2017-11-29-raspbian-stretch.zip | sudo dd of=/dev/disk1 bs=1m
     
 * Boot to brand new raspian
 
