@@ -1,5 +1,7 @@
 # Install Notes
 
+**Reference:** https://blog.truthlabs.com/beacon-tracking-with-node-js-and-raspberry-pi-794afa880318
+
 ## Setup a new raspian install
 
 Write raspian image to sd card from MacOS
@@ -19,6 +21,8 @@ Rename host to prox1. This gives us the ability to ssh to prox1.local. (avahi do
 Change passwd
 
 ## Install Bluez
+
+**Reference:** https://learn.adafruit.com/install-bluez-on-the-raspberry-pi/installation
 
 Is it already installed? Afterall, unlike the Pi 2 & 3, the Pi 3 ships with Bluetooth and WiFi
 
@@ -53,6 +57,4 @@ Sure, but is it active?
 
 So yes. Good.
 
-### References
 
-* https://learn.adafruit.com/install-bluez-on-the-raspberry-pi/installation
