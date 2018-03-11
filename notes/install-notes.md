@@ -4,6 +4,8 @@
 
 ## Setup a new raspian install
 
+Download raspian to my Mac. This is "Raspbian Stretch" which already has a lot of stuff installed that the above article ref  suggests you install. Will it work with diff versions and such? Who knows. 
+
 Write raspian image to sd card from MacOS
 
     $ diskutil list
@@ -68,4 +70,31 @@ Sure, but is it active?
 
 So yes. Good.
 
+## Install Node.js
 
+    $ node -v
+    v4.8.2
+
+Already installed. Great. Is it the right version to work with the library we'll try to use? Who knows.
+
+## Install Noble Library
+
+Ref: https://github.com/noble/noble
+
+As suggested:
+
+    $ sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev
+    
+Make sure node is in our path:
+
+    $ which node
+    /usr/bin/node
+    
+Get the library:
+
+    $ git clone https://github.com/noble/noble.git
+    Cloning into 'noble'...
+    remote: Counting objects: 2605, done.
+    remote: Total 2605 (delta 0), reused 0 (delta 0), pack-reused 2605
+    Receiving objects: 100% (2605/2605), 679.12 KiB | 0 bytes/s, done.
+    Resolving deltas: 100% (1605/1605), done.
