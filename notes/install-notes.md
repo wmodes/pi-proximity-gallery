@@ -20,6 +20,17 @@ Rename host to prox1. This gives us the ability to ssh to prox1.local. (avahi do
 
 Change passwd
 
+## Fine Tune Install
+
+Upload ssh key:
+
+    $ ssh-copy-id -i ~/.ssh/id_rsa.pub wmodes@prox1.local
+    Warning: the RSA host key for 'prox1.local' differs from the key for the IP address '192.168.0.37'
+    Offending key for IP in /Users/wmodes/.ssh/known_hosts:9
+    Matching host key in /Users/wmodes/.ssh/known_hosts:12
+    Are you sure you want to continue connecting (yes/no)? yes
+    wmodes@prox1.local's password: 
+
 ## Install Bluez
 
 **Reference:** https://learn.adafruit.com/install-bluez-on-the-raspberry-pi/installation
