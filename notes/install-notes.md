@@ -121,6 +121,28 @@ Install with npm:
     
 which fellback to building the binaries, but worked.
 
+## A Quick Test
 
+    $ vi noble-test.js
+    
+    var noble = require('noble');
+    noble.startScanning();
+    noble.on("discover", function(peripheral) {
+        //console.log("peripheral:", peripheral);
+        var macAddress = peripheral.uuid;
+        var rss = peripheral.rssi;
+        var localName = peripheral.advertisement.localName;
+        var manufacId = peripheral.advertisement.manufacturerData;
+        console.log("found device: mac:", macAddress, " name:", localName, " rss:", rss, " Id:", manufacId);
+    });
+
+Run it
+
+    $ sudo node noble-test.js
+    found device: mac: d3c58252c5b7  name: undefined  rss: -79  Id: undefined
+    found device: mac: d8a53c4d500a  name: undefined  rss: -76  Id: undefined
+    found device: mac: eccdb04c3704  name: undefined  rss: -73  Id: <Buffer 4c 00 02 15 e1 f5 4e 02 1e 23 44 e0 9c 3d 51 2e b5     6a de c9 00 64 00 64 b9>
+
+Woot.
 
 
