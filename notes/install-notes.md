@@ -4,6 +4,8 @@
 
 ## Setup a new raspian install
 
+Download raspian to my Mac. This is "Raspbian Stretch" which already has a lot of stuff installed that the above article ref  suggests you install. Will it work with diff versions and such? Who knows. 
+
 Write raspian image to sd card from MacOS
 
     $ diskutil list
@@ -30,6 +32,23 @@ Upload ssh key:
     Matching host key in /Users/wmodes/.ssh/known_hosts:12
     Are you sure you want to continue connecting (yes/no)? yes
     wmodes@prox1.local's password: 
+
+Install vim:
+
+    $ sudo apt-get install vimo
+
+Edit vimrc:
+
+    $ vi ~/.vimrc
+    
+    filetype plugin indent on
+    syntax on " enabled syntax highlighting
+    :set number " line numbers
+    :set ai " autoindent
+    :set tabstop=4 " sets tabs to 4 characters
+    :set shiftwidth=4
+    :set expandtab
+    :set softtabstop=4 " makes the spaces feel like real tabs
 
 ## Install Bluez
 
@@ -67,5 +86,63 @@ Sure, but is it active?
     Mar 03 05:13:30 prox1 bluetoothd[574]: Endpoint registered: sender=:1.10 path=/A2DP/SBC/Sink/1
 
 So yes. Good.
+
+## Install Node.js an npm
+
+    $ node -v
+    v4.8.2
+
+Already installed. Great. Is it the right version to work with the library we'll try to use? Who knows.
+
+My first attempt to install npm failed, so I had to:
+
+    $ sudo apt-get update
+    
+Then install npm:
+
+    $ sudo apt-get install npm
+
+## Install Noble Library
+
+Ref: https://github.com/noble/noble
+
+As suggested:
+
+    $ sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev
+    
+Make sure node is in our path:
+
+    $ which node
+    /usr/bin/node
+    
+Install with npm:
+
+    $ npm install noble
+    
+which fellback to building the binaries, but worked.
+
+## A Quick Test
+
+    $ vi noble-test.js
+    
+    var noble = require('noble');
+    noble.startScanning();
+    noble.on("discover", function(peripheral) {
+        //console.log("peripheral:", peripheral);
+        var macAddress = peripheral.uuid;
+        var rss = peripheral.rssi;
+        var localName = peripheral.advertisement.localName;
+        var manufacId = peripheral.advertisement.manufacturerData;
+        console.log("found device: mac:", macAddress, " name:", localName, " rss:", rss, " Id:", manufacId);
+    });
+
+Run it
+
+    $ sudo node noble-test.js
+    found device: mac: d3c58252c5b7  name: undefined  rss: -79  Id: undefined
+    found device: mac: d8a53c4d500a  name: undefined  rss: -76  Id: undefined
+    found device: mac: eccdb04c3704  name: undefined  rss: -73  Id: <Buffer 4c 00 02 15 e1 f5 4e 02 1e 23 44 e0 9c 3d 51 2e b5     6a de c9 00 64 00 64 b9>
+
+Woot.
 
 
