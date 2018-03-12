@@ -33,6 +33,23 @@ Upload ssh key:
     Are you sure you want to continue connecting (yes/no)? yes
     wmodes@prox1.local's password: 
 
+Install vim:
+
+    $ sudo apt-get install vimo
+
+Edit vimrc:
+
+    $ vi ~/.vimrc
+    
+    filetype plugin indent on
+    syntax on " enabled syntax highlighting
+    :set number " line numbers
+    :set ai " autoindent
+    :set tabstop=4 " sets tabs to 4 characters
+    :set shiftwidth=4
+    :set expandtab
+    :set softtabstop=4 " makes the spaces feel like real tabs
+
 ## Install Bluez
 
 **Reference:** https://learn.adafruit.com/install-bluez-on-the-raspberry-pi/installation
@@ -70,12 +87,20 @@ Sure, but is it active?
 
 So yes. Good.
 
-## Install Node.js
+## Install Node.js an npm
 
     $ node -v
     v4.8.2
 
 Already installed. Great. Is it the right version to work with the library we'll try to use? Who knows.
+
+My first attempt to install npm failed, so I had to:
+
+    $ sudo apt-get update
+    
+Then install npm:
+
+    $ sudo apt-get install npm
 
 ## Install Noble Library
 
@@ -90,13 +115,12 @@ Make sure node is in our path:
     $ which node
     /usr/bin/node
     
-Get the library:
+Install with npm:
 
-    $ git clone https://github.com/noble/noble.git
-    Cloning into 'noble'...
-    remote: Counting objects: 2605, done.
-    remote: Total 2605 (delta 0), reused 0 (delta 0), pack-reused 2605
-    Receiving objects: 100% (2605/2605), 679.12 KiB | 0 bytes/s, done.
-    Resolving deltas: 100% (1605/1605), done.
+    $ npm install noble
+    
+which fellback to building the binaries, but worked.
+
+
 
 
