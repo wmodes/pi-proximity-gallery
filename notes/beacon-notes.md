@@ -160,7 +160,9 @@ A simple function to calculate distance:
       }
     } 
 
-## Smoothing Noise
+# Smoothing Noise
+
+## Using Averages
 
 A simple way to smooth the noise is a rolling average:
 
@@ -176,6 +178,8 @@ Implemented in our tests (smoothing distance rather than RSSI):
     var alpha = data.distAlpha;
     bleacons[id].distSmooth = (alpha * distEst) + ((1 - alpha) * bleacons[id].distSmooth);
 
+However, if the alpha value is too low, it is hard for a changing value to move the result. If the value is high (say, 0.75), then the noisy values can still make the result jump around.
+
 Another way is to record an array of the last /n/ values and then periodically average these values.
 
     for (var i=bleacons[id].distArray.length-1; i>=0; i--) {
@@ -188,7 +192,10 @@ Smoother, but computationally expensive.
 ## Kalman Filters
 
 **Ref:** https://www.wouterbulten.nl/blog/tech/kalman-filters-explained-removing-noise-from-rssi-signals/
+**Ref:** https://www.wouterbulten.nl/blog/tech/lightweight-javascript-library-for-noise-filtering/
 
-A way used by many beaconeers is using Kalman Filters.
+A smoothing function used by many beacon developers is Kalman Filters.
+
+
 
 
