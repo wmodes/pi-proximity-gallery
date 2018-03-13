@@ -30,7 +30,6 @@ for (i=0; i<beacons.length; i++) {
     id = beacons[i].uuid + "+" + beacons[i].major + "+" + beacons[i].minor;
     blobj[id] = beacons[i];
 }
-console.log(blobj);
 
 var oneBeacon = beacons[0];
 var uuid = oneBeacon.uuid;
@@ -42,13 +41,13 @@ var minor = oneBeacon.minor;
 Bleacon.startScanning();
 
 Bleacon.on('discover', function(bleacon) {
-    console.log("bleacon:", bleacon);
+    //console.log("bleacon:", bleacon);
     id = bleacon.uuid + "+" + bleacon.major + "+" + bleacon.minor;
     //console.log("id:",id);
     if (id in blobj) {
         thisObj = blobj[id];
         //console.log(thisObj);
-        console.log("found bleacon: name:", thisObj.name, " power:", bleacon.measuredPower, "accu:", 
-            bleacon.accuracy, "prox:", bleacon.proximity);
+        console.log("found bleacon: name:", thisObj.name, " power:", bleacon.measuredPower, 
+            "rssi:", bleacon.rssi, "accu:", bleacon.accuracy, "prox:", bleacon.proximity);
     }
 });
