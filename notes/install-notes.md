@@ -108,3 +108,21 @@ Then install npm:
 
     $ sudo apt-get install npm
 
+## Install node version manager
+
+    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
+
+## Upgrade to newer version of node
+
+    $ nvm install v8.10.0
+    Downloading and installing node v8.10.0...
+    Downloading https://nodejs.org/dist/v8.10.0/node-v8.10.0-linux-armv7l.tar.xz...
+    ######################################################################## 100.0%
+    Computing checksum with sha256sum
+    Checksums matched!
+    Now using node v8.10.0 (npm v5.6.0)
+    Creating default alias: default -> v8.10.0
+
+    $ node -v
+    v8.10.0
+

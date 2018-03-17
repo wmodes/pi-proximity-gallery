@@ -196,6 +196,29 @@ Smoother, but computationally expensive.
 
 A smoothing function used by many beacon developers is Kalman Filters.
 
+Looking at the first article, we see
 
+> For our RSSI filtering application we assume that a device doesn’t move. Moreover, we assume that in the time frame of our measurement our own position is also static. In other words: over time we expect a constant RSSI signal, everything else is noise.
 
+Not true, for us, so we will have to keep our eyes open for opportunities to both smooth the noise and 
+allow our target to move.
+
+As far as I can tell, with Wouter's Kalman libary, you apply the Kalman filter to a dataset and it will smooth the data.
+
+So I'll install his library:
+
+    $ npm install kalmanjs
+
+This turned out to be installing some other simiarly named package:
+
+    $ npm remove kalmanjs
+
+To get Wouter's library:
+
+    $ cd
+    $ git clone https://github.com/wouterbulten/kalmanjs.git
+    $ cd kalmanjs
+    $ npm install
+
+var KalmanFilter = require('kalmanjs').default;
 
