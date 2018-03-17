@@ -25,3 +25,8 @@ module.exports.beacons = [
 module.exports.distLogLength = 5;
 
 module.exports.distAlpha = 0.75;
+
+module.exports.kalman = {
+    'R' : 0.01,
+    'Q' : 3
+}
