@@ -57,3 +57,8 @@ typings/
 # dotenv environment variables file
 .env
 
+# MacOS Artifacts
+Icon*
+
+# Vim Swp files
+.*.swp

@@ -74,7 +74,6 @@ Edit vimrc:
     :set shiftwidth=4
     :set expandtab
     :set softtabstop=4 " makes the spaces feel like real tabs
-    " Uncomment the following to have Vim jump to the last position when                                                           
     " reopening a file
     if has("autocmd")
       au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$")
