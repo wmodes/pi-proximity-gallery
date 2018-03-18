@@ -67,6 +67,25 @@ Edit vimrc:
         \| exe "normal! g'\"" | endif
     endif
 
+## Install Node.js an npm
+
+    $ node -v
+    v4.8.2
+
+Already installed. Great. Is it the right version to work with the library we'll try to use? Who knows.
+
+My first attempt to install npm failed, so I had to:
+
+    $ sudo apt-get update
+    
+Then install npm:
+
+    $ sudo apt-get install npm
+
+## Install needed bluetooth packages
+  
+    $ sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev
+
 ## Install Bluez
 
 **Reference:** https://learn.adafruit.com/install-bluez-on-the-raspberry-pi/installation
@@ -104,20 +123,10 @@ Sure, but is it active?
 
 So yes. Good.
 
-## Install Node.js an npm
 
-    $ node -v
-    v4.8.2
 
-Already installed. Great. Is it the right version to work with the library we'll try to use? Who knows.
 
-My first attempt to install npm failed, so I had to:
-
-    $ sudo apt-get update
-    
-Then install npm:
-
-    $ sudo apt-get install npm
+**IGNORE EVERYTHING BELOW HERE (It caused stuff to stop working)**
 
 ## Install node version manager
 
