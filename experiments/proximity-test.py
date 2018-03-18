@@ -14,7 +14,7 @@ for (var i=0; i<data.beacons.length; i++) {
 }
 
 // setup kalman filter
-var kalmanFilter = new KalmanFilter({R: data.kalman,R, Q: data.kalman.Q});
+var kalmanFilter = new KalmanFilter({R: data.kalman.R, Q: data.kalman.Q});
 
 //
 // maths
@@ -51,7 +51,7 @@ function dataMean(array) {
 Bleacon.startScanning();
 
 Bleacon.on('discover', function(bleacon) {
-    //console.log("bleacon:", bleacon);
+    console.log("bleacon:", bleacon);
     id = bleacon.uuid + "+" + bleacon.major + "+" + bleacon.minor;
     //console.log("id:",id);
     if (id in bleacons) {
