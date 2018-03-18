@@ -35,7 +35,7 @@ Upload ssh key:
 
 Install vim:
 
-    $ sudo apt-get install vimo
+    $ sudo apt-get install vim
 
 Edit vimrc:
 
@@ -125,4 +125,20 @@ Then install npm:
 
     $ node -v
     v8.10.0
+
+Unfortunately, we're getting errors as we run our experiments. It seems that the modules I'm installing are using the node 4.x install.
+
+## Reinstall node
+
+    $ sudo apt-get remove npm node nodejs
+    $ sudo rm `which node` `which npm`
+    $ sudo apt remove gyp libjs-inherits libjs-node-uuid
+    $ sudo apt-get update
+    $ sudo apt-get dist-upgrade
+
+This one was a long install and took a while.
+
+    $ curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+    $ sudo apt-get install -y nodejs
+    $ npm rebuild
 
