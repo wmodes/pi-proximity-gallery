@@ -22,6 +22,18 @@ Rename host to prox1. This gives us the ability to ssh to prox1.local. (avahi do
 
 Change passwd
 
+Create local wmodes user:
+
+    $ sudo adduser wmodes
+
+Add to approporiate groups:
+
+    $ sudo usermod -a -G `grep pi /etc/group | awk -F":" '{print $1}' | paste -sd "," -` wmodes
+
+Check that worked:
+
+    $ egrep "pi|wmodes" /etc/group
+
 ## Fine Tune Install
 
 Upload ssh key:
@@ -129,6 +141,8 @@ Then install npm:
 Unfortunately, we're getting errors as we run our experiments. It seems that the modules I'm installing are using the node 4.x install.
 
 ## Reinstall node
+
+**Do I need to do this? Because this is breaking some of the existing functionality.**
 
     $ sudo apt-get remove npm node nodejs
     $ sudo rm `which node` `which npm`
