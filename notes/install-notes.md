@@ -80,7 +80,7 @@ Edit vimrc:
         \| exe "normal! g'\"" | endif
     endif
 
-## Install Node.js an npm
+## Install Node.js and npm
 
     $ node -v
     v4.8.2
@@ -94,52 +94,6 @@ My first attempt to install npm failed, so I had to:
 Then install npm:
 
     $ sudo apt-get install npm
-
-## Install needed bluetooth packages
-  
-    $ sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev
-
-## Install Bluez
-
-**Reference:** https://learn.adafruit.com/install-bluez-on-the-raspberry-pi/installation
-
-Is it already installed? Afterall, unlike the Pi 2 & 3, the Pi 3 ships with Bluetooth and WiFi
-
-    $ dpkg-query -l | grep bluez
-    ii  bluez                                 5.43-2+rpt2+deb9u2                   armhf        Bluetooth tools and daemons
-    ii  bluez-firmware                        1.2-3+rpt1                           all          Firmware for Bluetooth devices
-
-Gosh, that makes things easy.
-
-Sure, but is it active?
-
-    $ systemctl status bluetooth
-    ● bluetooth.service - Bluetooth service
-       Loaded: loaded (/lib/systemd/system/bluetooth.service; enabled; vendor preset: enabled)
-       Active: active (running) since Sat 2018-03-03 05:13:30 UTC; 16min ago
-         Docs: man:bluetoothd(8)
-     Main PID: 574 (bluetoothd)
-       Status: "Running"
-       CGroup: /system.slice/bluetooth.service
-               └─574 /usr/lib/bluetooth/bluetoothd
-    
-    Mar 03 05:13:30 prox1 systemd[1]: Starting Bluetooth service...
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Bluetooth daemon 5.43
-    Mar 03 05:13:30 prox1 systemd[1]: Started Bluetooth service.
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Starting SDP server
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Bluetooth management interface 1.14 initialized
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Failed to obtain handles for "Service Changed" characteristic
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Sap driver initialization failed.
-    Mar 03 05:13:30 prox1 bluetoothd[574]: sap-server: Operation not permitted (1)
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Endpoint registered: sender=:1.10 path=/A2DP/SBC/Source/1
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Endpoint registered: sender=:1.10 path=/A2DP/SBC/Sink/1
-
-So yes. Good.
-
-
-
-
-**IGNORE EVERYTHING BELOW HERE (It caused stuff to stop working)**
 
 ## Authentication at github
 
@@ -195,6 +149,145 @@ If you have just restored from an image backup, you may have to update what has 
     $ ssh prox1.local
     $ cd pi-proximity-gallery
     $ git pull
+
+## Install needed bluetooth packages
+  
+    $ sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev
+
+## Install Bluez
+
+**Reference:** https://learn.adafruit.com/install-bluez-on-the-raspberry-pi/installation
+
+Is it already installed? Afterall, unlike the Pi 2 & 3, the Pi 3 ships with Bluetooth and WiFi
+
+    $ dpkg-query -l | grep bluez
+    ii  bluez                                 5.43-2+rpt2+deb9u2                   armhf        Bluetooth tools and daemons
+    ii  bluez-firmware                        1.2-3+rpt1                           all          Firmware for Bluetooth devices
+
+Gosh, that makes things easy.
+
+Sure, but is it active?
+
+    $ systemctl status bluetooth
+    ● bluetooth.service - Bluetooth service
+       Loaded: loaded (/lib/systemd/system/bluetooth.service; enabled; vendor preset: enabled)
+       Active: active (running) since Sat 2018-03-03 05:13:30 UTC; 16min ago
+         Docs: man:bluetoothd(8)
+     Main PID: 574 (bluetoothd)
+       Status: "Running"
+       CGroup: /system.slice/bluetooth.service
+               └─574 /usr/lib/bluetooth/bluetoothd
+    
+    Mar 03 05:13:30 prox1 systemd[1]: Starting Bluetooth service...
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Bluetooth daemon 5.43
+    Mar 03 05:13:30 prox1 systemd[1]: Started Bluetooth service.
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Starting SDP server
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Bluetooth management interface 1.14 initialized
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Failed to obtain handles for "Service Changed" characteristic
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Sap driver initialization failed.
+    Mar 03 05:13:30 prox1 bluetoothd[574]: sap-server: Operation not permitted (1)
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Endpoint registered: sender=:1.10 path=/A2DP/SBC/Source/1
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Endpoint registered: sender=:1.10 path=/A2DP/SBC/Sink/1
+
+So yes. Good.
+
+## Enable bluetooth (and test)
+
+    $ sudo bluetoothctl
+    [NEW] Controller B8:27:EB:50:ED:AB prox1 [default]
+    [bluetooth]# agent on
+    Agent registered
+    [bluetooth]# scan on
+    Discovery started
+    [CHG] Controller B8:27:EB:50:ED:AB Discovering: yes
+    [NEW] Device D7:A4:3B:4C:4F:09 D7-A4-3B-4C-4F-09
+    [NEW] Device D0:C2:7F:4F:C2:B4 D0-C2-7F-4F-C2-B4
+    [NEW] Device F0:F4:10:B6:AA:FB F0-F4-10-B6-AA-FB
+    [NEW] Device D2:C4:81:51:C4:B6 D2-C4-81-51-C4-B6
+
+Without this, stuff doesn't seem to work.
+
+## Upgrade to newer version of node
+
+**Ref:** https://stackoverflow.com/questions/10075990/upgrading-node-js-to-latest-version
+
+Some modules need newer version of node than the default node 4.x. However, this upgrade has cost me more grief than anything else. Yes, we can upgrade node, but what about the modules? 
+
+There a lot of different methods: apt-get? nvm? The node n-module? Or the quick install instructions at nodejs.org?
+
+I feel like I've had the best luck with the install instructions at nodejs.org. But I'm not completely sure,
+since I've spun out in a cascading series of desperate module deletions, reinstalls, and corrections on almost
+every method.
+
+Also, I'm suspicous of any method that installs modules locally rather than globally. But now tha I'm paying
+closer attention, perhaps they all do?
+
+## Install needed packages
+
+    $ npm install noble bleacon
+
+And make sure our tests work:
+
+    $ sudo node noble-test.js
+    $ sudo node bleacon-test.js
+
+However,
+
+    $ sudo node proximity-test.py 
+    module.js:327
+        throw err;
+        ^
+
+    Error: Cannot find module 'kalmanjs'
+        
+I need the kalmanjs module:
+
+    $ npm install kalmanjs
+    npm ERR! notarget No compatible version found: kalmanjs@'*'
+    npm ERR! notarget Valid install targets:
+    npm ERR! notarget ["1.0.0-beta"]
+    npm ERR! notarget 
+    npm ERR! notarget This is most likely not a problem with npm itself.
+    npm ERR! notarget In most cases you or one of your dependencies are requesting
+    npm ERR! notarget a package version that doesn't exist.
+
+So this is why I started updating node.
+
+## Install n module to manage node version
+
+    $ node -v
+    v4.8.2
+    $ sudo npm install n -g
+    /usr/local/bin/n -> /usr/local/lib/node_modules/n/bin/n
+    n@2.1.8 /usr/local/lib/node_modules/n
+
+## Update to latest stable node release
+
+    $ sudo n stable
+
+         install : node-v9.8.0
+           mkdir : /usr/local/n/versions/node/9.8.0
+           fetch : https://nodejs.org/dist/v9.8.0/node-v9.8.0-linux-armv7l.tar.gz
+    ######################################################################## 100.0%
+       installed : v9.8.0
+
+New version running?
+
+    $ node -v
+    v4.8.2
+
+Dude, fuck that.
+
+## Use Node installer to upgrade
+
+    $ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+    $ sudo apt-get install -y nodejs
+    $ node -v
+    v9.8.0
+
+
+
+**IGNORE EVERYTHING BELOW HERE (It caused stuff to stop working)**
 
 ## Install node version manager
 
