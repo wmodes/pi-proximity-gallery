@@ -60,23 +60,19 @@ Bleacon.on('discover', function(bleacon) {
         if (!('distData' in bleacons[id])) {
             bleacons[id].distData = [];
         } 
-        if (!('distSmooth' in bleacons[id])) {
-            bleacons[id].distSmooth = distEst;
-        } 
+        //if (!('distSmooth' in bleacons[id])) {
+        //    bleacons[id].distSmooth = distEst;
+        //} 
         // keep a rolling log of distance estimates
         bleacons[id].distData.push(distEst);
         while (bleacons[id].distData.length > data.distLogLength) {
             bleacons[id].distData.shift();
         }
-        // calc smoothed distance
-        var alpha = data.distAlpha;
-        bleacons[id].distSmooth = (alpha * distEst) + ((1 - alpha) * bleacons[id].distSmooth);
-        // average distance
-        var sum = 0;
-        for (var i=bleacons[id].distData.length-1; i>=0; i--) {
-            sum += bleacons[id].distData[i];
-        }
-        bleacons[id].distAvg = dataMean(bleacons[id].distData);
+        //// calc smoothed distance
+        //var alpha = data.distAlpha;
+        //bleacons[id].distSmooth = (alpha * distEst) + ((1 - alpha) * bleacons[id].distSmooth);
+        //// average distance
+        //bleacons[id].distAvg = dataMean(bleacons[id].distData);
 
         // Use Kalman filter on dist data
         bleacons[id].kalmanData = bleacons[id].distData.map(function(v) {
@@ -84,11 +80,12 @@ Bleacon.on('discover', function(bleacon) {
         });
         bleacons[id].kalmanAvg = dataMean(bleacons[id].kalmanData);
 
-        console.log(bleacons[id]);
-        console.log("found bleacon: name:", bleacons[id].name, " power:", bleacon.measuredPower, 
-            "rssi:", bleacon.rssi, "accu:", bleacon.accuracy.toFixed(2), 
-            "smooth dist:", bleacons[id].distSmooth.toFixed(2), 
-            "dist mean:", bleacons[id].distAvg.toFixed(2), 
+        //console.log(bleacons[id]);
+        console.log("name:", bleacons[id].name, 
+            //" power:", bleacon.measuredPower, 
+            //"rssi:", bleacon.rssi, "accu:", bleacon.accuracy.toFixed(2), 
+            //"smooth dist:", bleacons[id].distSmooth.toFixed(2), 
+            //"dist mean:", bleacons[id].distAvg.toFixed(2), 
             "kalman mean:", bleacons[id].kalmanAvg.toFixed(2), 
             "prox:", bleacon.proximity);
     }
