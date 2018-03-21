@@ -51,7 +51,7 @@ function dataMean(array) {
 Bleacon.startScanning();
 
 Bleacon.on('discover', function(bleacon) {
-    console.log("bleacon:", bleacon);
+    //console.log("bleacon:", bleacon);
     id = bleacon.uuid + "+" + bleacon.major + "+" + bleacon.minor;
     //console.log("id:",id);
     if (id in bleacons) {
@@ -79,7 +79,7 @@ Bleacon.on('discover', function(bleacon) {
         bleacons[id].distAvg = dataMean(bleacons[id].distData);
 
         // Use Kalman filter on dist data
-        bleacons[id].kalmanData = distData.map(function(v) {
+        bleacons[id].kalmanData = bleacons[id].distData.map(function(v) {
             return kalmanFilter.filter(v);
         });
         bleacons[id].kalmanAvg = dataMean(bleacons[id].kalmanData);
