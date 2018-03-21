@@ -80,44 +80,7 @@ Edit vimrc:
         \| exe "normal! g'\"" | endif
     endif
 
-## Install Bluez
-
-**Reference:** https://learn.adafruit.com/install-bluez-on-the-raspberry-pi/installation
-
-Is it already installed? Afterall, unlike the Pi 2 & 3, the Pi 3 ships with Bluetooth and WiFi
-
-    $ dpkg-query -l | grep bluez
-    ii  bluez                                 5.43-2+rpt2+deb9u2                   armhf        Bluetooth tools and daemons
-    ii  bluez-firmware                        1.2-3+rpt1                           all          Firmware for Bluetooth devices
-
-Gosh, that makes things easy.
-
-Sure, but is it active?
-
-    $ systemctl status bluetooth
-    ● bluetooth.service - Bluetooth service
-       Loaded: loaded (/lib/systemd/system/bluetooth.service; enabled; vendor preset: enabled)
-       Active: active (running) since Sat 2018-03-03 05:13:30 UTC; 16min ago
-         Docs: man:bluetoothd(8)
-     Main PID: 574 (bluetoothd)
-       Status: "Running"
-       CGroup: /system.slice/bluetooth.service
-               └─574 /usr/lib/bluetooth/bluetoothd
-    
-    Mar 03 05:13:30 prox1 systemd[1]: Starting Bluetooth service...
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Bluetooth daemon 5.43
-    Mar 03 05:13:30 prox1 systemd[1]: Started Bluetooth service.
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Starting SDP server
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Bluetooth management interface 1.14 initialized
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Failed to obtain handles for "Service Changed" characteristic
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Sap driver initialization failed.
-    Mar 03 05:13:30 prox1 bluetoothd[574]: sap-server: Operation not permitted (1)
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Endpoint registered: sender=:1.10 path=/A2DP/SBC/Source/1
-    Mar 03 05:13:30 prox1 bluetoothd[574]: Endpoint registered: sender=:1.10 path=/A2DP/SBC/Sink/1
-
-So yes. Good.
-
-## Install Node.js an npm
+## Install Node.js and npm
 
     $ node -v
     v4.8.2
@@ -179,7 +142,7 @@ We can restore from this backup, similar to how we wrote our card originally. **
     $ diskutil unmount /dev/disk1s1
     $ gunzip -c 2018-03-18-raspian-stretch-basic.gz | sudo dd of=/dev/disk1 bs=4m 
 
-## Update
+## Update repo
 
 If you have just restored from an image backup, you may have to update what has happened since the last backup. Login and go into the repo:
 
@@ -187,41 +150,246 @@ If you have just restored from an image backup, you may have to update what has 
     $ cd pi-proximity-gallery
     $ git pull
 
-## Install node version manager
+## Install needed bluetooth packages
+  
+    $ sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev
 
-    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
+## Install Bluez
+
+**Reference:** https://learn.adafruit.com/install-bluez-on-the-raspberry-pi/installation
+
+Is it already installed? Afterall, unlike the Pi 2 & 3, the Pi 3 ships with Bluetooth and WiFi
+
+    $ dpkg-query -l | grep bluez
+    ii  bluez                                 5.43-2+rpt2+deb9u2                   armhf        Bluetooth tools and daemons
+    ii  bluez-firmware                        1.2-3+rpt1                           all          Firmware for Bluetooth devices
+
+Gosh, that makes things easy.
+
+Sure, but is it active?
+
+    $ systemctl status bluetooth
+    ● bluetooth.service - Bluetooth service
+       Loaded: loaded (/lib/systemd/system/bluetooth.service; enabled; vendor preset: enabled)
+       Active: active (running) since Sat 2018-03-03 05:13:30 UTC; 16min ago
+         Docs: man:bluetoothd(8)
+     Main PID: 574 (bluetoothd)
+       Status: "Running"
+       CGroup: /system.slice/bluetooth.service
+               └─574 /usr/lib/bluetooth/bluetoothd
+    
+    Mar 03 05:13:30 prox1 systemd[1]: Starting Bluetooth service...
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Bluetooth daemon 5.43
+    Mar 03 05:13:30 prox1 systemd[1]: Started Bluetooth service.
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Starting SDP server
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Bluetooth management interface 1.14 initialized
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Failed to obtain handles for "Service Changed" characteristic
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Sap driver initialization failed.
+    Mar 03 05:13:30 prox1 bluetoothd[574]: sap-server: Operation not permitted (1)
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Endpoint registered: sender=:1.10 path=/A2DP/SBC/Source/1
+    Mar 03 05:13:30 prox1 bluetoothd[574]: Endpoint registered: sender=:1.10 path=/A2DP/SBC/Sink/1
+
+So yes. Good.
+
+## Enable bluetooth (and test)
+
+    $ sudo bluetoothctl
+    [NEW] Controller B8:27:EB:50:ED:AB prox1 [default]
+    [bluetooth]# agent on
+    Agent registered
+    [bluetooth]# scan on
+    Discovery started
+    [CHG] Controller B8:27:EB:50:ED:AB Discovering: yes
+    [NEW] Device D7:A4:3B:4C:4F:09 D7-A4-3B-4C-4F-09
+    [NEW] Device D0:C2:7F:4F:C2:B4 D0-C2-7F-4F-C2-B4
+    [NEW] Device F0:F4:10:B6:AA:FB F0-F4-10-B6-AA-FB
+    [NEW] Device D2:C4:81:51:C4:B6 D2-C4-81-51-C4-B6
+
+Without this, stuff doesn't seem to work.
+
+## Create experiments
+
+I created three experiments.
+
+* A test of noble.js
+* A test of bleacon.js
+* A test of kalman.js
+
+## Install needed packages
+
+    $ npm install noble bleacon
+
+And make sure our tests work:
+
+    $ sudo node noble-test.js
+    $ sudo node bleacon-test.js
+
+However,
+
+    $ sudo node proximity-test.py 
+    module.js:327
+        throw err;
+        ^
+
+    Error: Cannot find module 'kalmanjs'
+        
+I need the kalmanjs module:
+
+    $ npm install kalmanjs
+    npm ERR! notarget No compatible version found: kalmanjs@'*'
+    npm ERR! notarget Valid install targets:
+    npm ERR! notarget ["1.0.0-beta"]
+    npm ERR! notarget 
+    npm ERR! notarget This is most likely not a problem with npm itself.
+    npm ERR! notarget In most cases you or one of your dependencies are requesting
+    npm ERR! notarget a package version that doesn't exist.
+
+So this is why I started updating node.
 
 ## Upgrade to newer version of node
 
-    $ nvm install v8.10.0
-    Downloading and installing node v8.10.0...
-    Downloading https://nodejs.org/dist/v8.10.0/node-v8.10.0-linux-armv7l.tar.xz...
-    ######################################################################## 100.0%
-    Computing checksum with sha256sum
-    Checksums matched!
-    Now using node v8.10.0 (npm v5.6.0)
-    Creating default alias: default -> v8.10.0
+**Ref:** https://stackoverflow.com/questions/10075990/upgrading-node-js-to-latest-version
+
+Some modules need newer version of node than the default node 4.x. However, this upgrade has cost me more grief than anything else. Yes, we can upgrade node, but what about the modules? 
+
+There a lot of different methods: apt-get? nvm? The node n-module? Or the quick install instructions at nodejs.org?
+
+I feel like I've had the best luck with the install instructions at nodejs.org. But I'm not completely sure,
+since I've spun out in a cascading series of desperate module deletions, reinstalls, and corrections on almost
+every method.
+
+Also, I'm suspicous of any method that installs modules locally rather than globally. But now tha I'm paying
+closer attention, perhaps they all do?
+
+### Install n module to manage node version (don't do this)
 
     $ node -v
-    v8.10.0
+    v4.8.2
+    $ sudo npm install n -g
+    /usr/local/bin/n -> /usr/local/lib/node_modules/n/bin/n
+    n@2.1.8 /usr/local/lib/node_modules/n
 
-Unfortunately, we're getting errors as we run our experiments. It seems that the modules I'm installing are using the node 4.x install.
+### Update to latest stable node release (don't do this)
 
-## Reinstall node
+    $ sudo n stable
 
-**Do I need to do this? Because this is breaking some of the existing functionality.**
+         install : node-v9.8.0
+           mkdir : /usr/local/n/versions/node/9.8.0
+           fetch : https://nodejs.org/dist/v9.8.0/node-v9.8.0-linux-armv7l.tar.gz
+    ######################################################################## 100.0%
+       installed : v9.8.0
 
-    $ sudo apt-get remove npm node nodejs
-    $ sudo rm `which node` `which npm`
-    $ sudo apt remove gyp libjs-inherits libjs-node-uuid
-    $ sudo apt-get update
-    $ sudo apt-get dist-upgrade
+New version running?
 
-This one was a long install and took a while.
+    $ node -v
+    v4.8.2
+
+Dude, fuck that.
+
+### Use Node installer to upgrade (don't do this)
 
     $ curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
     $ sudo apt-get install -y nodejs
-    $ npm rebuild
-    $ npm rebuild
-    $ npm i -g npm
+    $ node -v
+    v9.8.0
+
+Only problem is this isn't reversible
+
+### Install node version manager
+
+    $ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
+
+And as instructed:
+
+    $ export NVM_DIR="$HOME/.nvm"
+    $ [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+### Upgrade to newer version of node
+
+    $ node -v
+    v4.8.2
+    $ nvm install 4
+    Downloading and installing node v4.8.7...
+    Downloading https://nodejs.org/dist/v4.8.7/node-v4.8.7-linux-armv7l.tar.xz...
+    ######################################################################## 100.0%
+    Computing checksum with sha256sum
+    Checksums matched!
+    Now using node v4.8.7 (npm v2.15.11)
+    Creating default alias: default -> 4 (-> v4.8.7)
+    $ node -v
+    v4.8.7
+
+And at this version of node, all of our experiments work.
+
+But then (Big Reveal), I've been running all of my experiments as root via sudo because they needed 
+permission to access bluetooth functionality. And after all that:
+
+    $ sudo node -v
+    v4.8.2
+
+For root, node has been at 4.x all along. I definitely thought that the kalman filters
+were not running with the default version of node. O-kay. So maybe you don't have to do
+anything with the default version of node afterall.
+
+## Test experiments
+
+Test noble.js:
+
+    $ sudo node noble-test.js 
+    connected to peripheral: d2c48151c4b6
+    noble warning: unknown peripheral d2c48151c4b6
+    connected to peripheral: d7a43b4c4f09
+    noble warning: unknown peripheral d7a43b4c4f09
+    connected to peripheral: f0f410b6aafb
+
+Test bleacon.js:
+
+    $ sudo node bleacon-test.js 
+    found bleacon: name: Ice1  power: -59 rssi: -46 accu: 0.4398670722282996 prox: immediate
+    found bleacon: name: Mint1  power: -59 rssi: -47 accu: 0.46855250483641503 prox: immediate
+    found bleacon: name: Ice1  power: -59 rssi: -46 accu: 0.4398670722282996 prox: immediate
+
+Test kalman.js:
+
+    $ sudo node kalman-test.js 
+    Orig data: [ 4, 4, 4, 4, 4, 4 ]
+    Noisy data: [ 5.217560821212828,
+      4.201884876936674,
+      7.56900835223496,
+      4.63440574798733,
+      6.7727666683495045,
+      5.147538051940501 ]
+    Kalman filtered data: [ 5.217560821212828,
+      4.708877860768365,
+      5.667534804528915,
+      4.997955898381812,
+      5.191878377523501,
+      5.187391046589226 ]
+
+Okay, so that's good.
+
+## Don't run at root
+
+But I am still running all of my experiments as root. For this reason:
+
+    $  node bleacon-test.js 
+    bleno warning: adapter state unauthorized, please run as root or with sudo
+                   or see README for information on running without root/sudo:
+                   https://github.com/sandeepmistry/bleno#running-on-linux
+    noble warning: adapter state unauthorized, please run as root or with sudo
+                   or see README for information on running without root/sudo:
+                   https://github.com/sandeepmistry/noble#running-on-linux
+
+But looking at the indicated github, we can:
+
+    $ sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
+
+And then:
+
+    $ node bleacon-test.js 
+    found bleacon: name: Ice1  power: -59 rssi: -46 accu: 0.4398670722282996 prox: immediate
+    found bleacon: name: Mint1  power: -59 rssi: -47 accu: 0.46855250483641503 prox: immediate
+    found bleacon: name: Ice1  power: -59 rssi: -46 accu: 0.4398670722282996 prox: immediate
+
+Great.
 
