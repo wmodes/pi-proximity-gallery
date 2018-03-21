@@ -142,7 +142,7 @@ We can restore from this backup, similar to how we wrote our card originally. **
     $ diskutil unmount /dev/disk1s1
     $ gunzip -c 2018-03-18-raspian-stretch-basic.gz | sudo dd of=/dev/disk1 bs=4m 
 
-## Update
+## Update repo
 
 If you have just restored from an image backup, you may have to update what has happened since the last backup. Login and go into the repo:
 
@@ -207,20 +207,13 @@ So yes. Good.
 
 Without this, stuff doesn't seem to work.
 
-## Upgrade to newer version of node
+## Create experiments
 
-**Ref:** https://stackoverflow.com/questions/10075990/upgrading-node-js-to-latest-version
+I created three experiments.
 
-Some modules need newer version of node than the default node 4.x. However, this upgrade has cost me more grief than anything else. Yes, we can upgrade node, but what about the modules? 
-
-There a lot of different methods: apt-get? nvm? The node n-module? Or the quick install instructions at nodejs.org?
-
-I feel like I've had the best luck with the install instructions at nodejs.org. But I'm not completely sure,
-since I've spun out in a cascading series of desperate module deletions, reinstalls, and corrections on almost
-every method.
-
-Also, I'm suspicous of any method that installs modules locally rather than globally. But now tha I'm paying
-closer attention, perhaps they all do?
+* A test of noble.js
+* A test of bleacon.js
+* A test of kalman.js
 
 ## Install needed packages
 
@@ -253,7 +246,22 @@ I need the kalmanjs module:
 
 So this is why I started updating node.
 
-## Install n module to manage node version
+## Upgrade to newer version of node
+
+**Ref:** https://stackoverflow.com/questions/10075990/upgrading-node-js-to-latest-version
+
+Some modules need newer version of node than the default node 4.x. However, this upgrade has cost me more grief than anything else. Yes, we can upgrade node, but what about the modules? 
+
+There a lot of different methods: apt-get? nvm? The node n-module? Or the quick install instructions at nodejs.org?
+
+I feel like I've had the best luck with the install instructions at nodejs.org. But I'm not completely sure,
+since I've spun out in a cascading series of desperate module deletions, reinstalls, and corrections on almost
+every method.
+
+Also, I'm suspicous of any method that installs modules locally rather than globally. But now tha I'm paying
+closer attention, perhaps they all do?
+
+### Install n module to manage node version (don't do this)
 
     $ node -v
     v4.8.2
@@ -261,7 +269,7 @@ So this is why I started updating node.
     /usr/local/bin/n -> /usr/local/lib/node_modules/n/bin/n
     n@2.1.8 /usr/local/lib/node_modules/n
 
-## Update to latest stable node release
+### Update to latest stable node release (don't do this)
 
     $ sudo n stable
 
@@ -278,52 +286,110 @@ New version running?
 
 Dude, fuck that.
 
-## Use Node installer to upgrade
+### Use Node installer to upgrade (don't do this)
 
-    $ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+    $ curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
     $ sudo apt-get install -y nodejs
     $ node -v
     v9.8.0
 
+Only problem is this isn't reversible
 
+### Install node version manager
 
-**IGNORE EVERYTHING BELOW HERE (It caused stuff to stop working)**
+    $ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
 
-## Install node version manager
+And as instructed:
 
-    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
+    $ export NVM_DIR="$HOME/.nvm"
+    $ [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-## Upgrade to newer version of node
+### Upgrade to newer version of node
 
-    $ nvm install v8.10.0
-    Downloading and installing node v8.10.0...
-    Downloading https://nodejs.org/dist/v8.10.0/node-v8.10.0-linux-armv7l.tar.xz...
+    $ node -v
+    v4.8.2
+    $ nvm install 4
+    Downloading and installing node v4.8.7...
+    Downloading https://nodejs.org/dist/v4.8.7/node-v4.8.7-linux-armv7l.tar.xz...
     ######################################################################## 100.0%
     Computing checksum with sha256sum
     Checksums matched!
-    Now using node v8.10.0 (npm v5.6.0)
-    Creating default alias: default -> v8.10.0
-
+    Now using node v4.8.7 (npm v2.15.11)
+    Creating default alias: default -> 4 (-> v4.8.7)
     $ node -v
-    v8.10.0
+    v4.8.7
 
-Unfortunately, we're getting errors as we run our experiments. It seems that the modules I'm installing are using the node 4.x install.
+And at this version of node, all of our experiments work.
 
-## Reinstall node
+But then (Big Reveal), I've been running all of my experiments as root via sudo because they needed 
+permission to access bluetooth functionality. And after all that:
 
-**Do I need to do this? Because this is breaking some of the existing functionality.**
+    $ sudo node -v
+    v4.8.2
 
-    $ sudo apt-get remove npm node nodejs
-    $ sudo rm `which node` `which npm`
-    $ sudo apt remove gyp libjs-inherits libjs-node-uuid
-    $ sudo apt-get update
-    $ sudo apt-get dist-upgrade
+For root, node has been at 4.x all along. I definitely thought that the kalman filters
+were not running with the default version of node. O-kay. So maybe you don't have to do
+anything with the default version of node afterall.
 
-This one was a long install and took a while.
+## Test experiments
 
-    $ curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
-    $ sudo apt-get install -y nodejs
-    $ npm rebuild
-    $ npm rebuild
-    $ npm i -g npm
+Test noble.js:
+
+    $ sudo node noble-test.js 
+    connected to peripheral: d2c48151c4b6
+    noble warning: unknown peripheral d2c48151c4b6
+    connected to peripheral: d7a43b4c4f09
+    noble warning: unknown peripheral d7a43b4c4f09
+    connected to peripheral: f0f410b6aafb
+
+Test bleacon.js:
+
+    $ sudo node bleacon-test.js 
+    found bleacon: name: Ice1  power: -59 rssi: -46 accu: 0.4398670722282996 prox: immediate
+    found bleacon: name: Mint1  power: -59 rssi: -47 accu: 0.46855250483641503 prox: immediate
+    found bleacon: name: Ice1  power: -59 rssi: -46 accu: 0.4398670722282996 prox: immediate
+
+Test kalman.js:
+
+    $ sudo node kalman-test.js 
+    Orig data: [ 4, 4, 4, 4, 4, 4 ]
+    Noisy data: [ 5.217560821212828,
+      4.201884876936674,
+      7.56900835223496,
+      4.63440574798733,
+      6.7727666683495045,
+      5.147538051940501 ]
+    Kalman filtered data: [ 5.217560821212828,
+      4.708877860768365,
+      5.667534804528915,
+      4.997955898381812,
+      5.191878377523501,
+      5.187391046589226 ]
+
+Okay, so that's good.
+
+## Don't run at root
+
+But I am still running all of my experiments as root. For this reason:
+
+    $  node bleacon-test.js 
+    bleno warning: adapter state unauthorized, please run as root or with sudo
+                   or see README for information on running without root/sudo:
+                   https://github.com/sandeepmistry/bleno#running-on-linux
+    noble warning: adapter state unauthorized, please run as root or with sudo
+                   or see README for information on running without root/sudo:
+                   https://github.com/sandeepmistry/noble#running-on-linux
+
+But looking at the indicated github, we can:
+
+    $ sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
+
+And then:
+
+    $ node bleacon-test.js 
+    found bleacon: name: Ice1  power: -59 rssi: -46 accu: 0.4398670722282996 prox: immediate
+    found bleacon: name: Mint1  power: -59 rssi: -47 accu: 0.46855250483641503 prox: immediate
+    found bleacon: name: Ice1  power: -59 rssi: -46 accu: 0.4398670722282996 prox: immediate
+
+Great.
 
