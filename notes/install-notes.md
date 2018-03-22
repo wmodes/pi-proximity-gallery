@@ -47,16 +47,22 @@ Check that worked:
 
     $ egrep "pi|wmodes" /etc/group
 
-## Fine Tune Install
+## Login without password
 
 Upload ssh key from back on your laptop:
 
-    $ ssh-copy-id -i ~/.ssh/id_rsa.pub wmodes@prox1.local
+    laptop:~ $ ssh-copy-id -i ~/.ssh/id_rsa.pub wmodes@prox1.local
     Warning: the RSA host key for 'prox1.local' differs from the key for the IP address '192.168.0.37'
     Offending key for IP in /Users/wmodes/.ssh/known_hosts:9
     Matching host key in /Users/wmodes/.ssh/known_hosts:12
     Are you sure you want to continue connecting (yes/no)? yes
     wmodes@prox1.local's password: 
+
+Check that it worked:
+
+    laptop:~ $ ssh wmodes@prox1.local
+
+## Fine Tune Install
 
 Install vim:
 
@@ -68,7 +74,7 @@ Edit vimrc:
     
     filetype plugin indent on
     syntax on " enabled syntax highlighting
-    :set number " line numbers
+    ":set number " line numbers
     :set ai " autoindent
     :set tabstop=4 " sets tabs to 4 characters
     :set shiftwidth=4
@@ -112,6 +118,11 @@ Get the public key:
     $ cat ~/.ssh/id_rsa.pub
 
 Copy that and go to https://github.com/settings/ssh/new and paste the key in.
+
+Identify yo'self to git locally:
+
+    $ git config --global user.email "wmodes@gmail.com"
+    $ git config --global user.name "Wes Modes"
 
 ## Setup local dev directories
 
@@ -206,46 +217,6 @@ So yes. Good.
     [NEW] Device D2:C4:81:51:C4:B6 D2-C4-81-51-C4-B6
 
 Without this, stuff doesn't seem to work.
-
-## Create experiments
-
-I created three experiments.
-
-* A test of noble.js
-* A test of bleacon.js
-* A test of kalman.js
-
-## Install needed packages
-
-    $ npm install noble bleacon
-
-And make sure our tests work:
-
-    $ sudo node noble-test.js
-    $ sudo node bleacon-test.js
-
-However,
-
-    $ sudo node proximity-test.py 
-    module.js:327
-        throw err;
-        ^
-
-    Error: Cannot find module 'kalmanjs'
-        
-I need the kalmanjs module:
-
-    $ npm install kalmanjs
-    npm ERR! notarget No compatible version found: kalmanjs@'*'
-    npm ERR! notarget Valid install targets:
-    npm ERR! notarget ["1.0.0-beta"]
-    npm ERR! notarget 
-    npm ERR! notarget This is most likely not a problem with npm itself.
-    npm ERR! notarget In most cases you or one of your dependencies are requesting
-    npm ERR! notarget a package version that doesn't exist.
-
-So this is why I started updating node.
-
 ## Upgrade to newer version of node
 
 **Ref:** https://stackoverflow.com/questions/10075990/upgrading-node-js-to-latest-version
@@ -259,7 +230,7 @@ since I've spun out in a cascading series of desperate module deletions, reinsta
 every method.
 
 Also, I'm suspicous of any method that installs modules locally rather than globally. But now tha I'm paying
-closer attention, perhaps they all do?
+closer attention, perhaps they all do? Eventually, I discovered npm's -g (global) flag which installs them for everyone rather than locally.
 
 ### Install n module to manage node version (don't do this)
 
@@ -319,7 +290,7 @@ And as instructed:
     $ node -v
     v4.8.7
 
-And at this version of node, all of our experiments work.
+And at this version of node, all of our experiments below work.
 
 But then (Big Reveal), I've been running all of my experiments as root via sudo because they needed 
 permission to access bluetooth functionality. And after all that:
@@ -331,6 +302,18 @@ For root, node has been at 4.x all along. I definitely thought that the kalman f
 were not running with the default version of node. O-kay. So maybe you don't have to do
 anything with the default version of node afterall.
 
+## Create experiments
+
+I created three experiments.
+
+* A test of noble.js
+* A test of bleacon.js
+* A test of kalman.js
+
+## Install needed packages
+
+    $ npm install noble bleacon ansi-escapes sprintf-js kalmanjs
+
 ## Test experiments
 
 Test noble.js:
@@ -341,6 +324,8 @@ Test noble.js:
     connected to peripheral: d7a43b4c4f09
     noble warning: unknown peripheral d7a43b4c4f09
     connected to peripheral: f0f410b6aafb
+
+If this seems to do nothing, I've found it helps to run ```sudo bluetoothctl``` above.
 
 Test bleacon.js:
 
@@ -393,6 +378,34 @@ And then:
 
 Great.
 
-## Install more required packages
+## Try the bigger test
 
-    $ npm install ansi-escapes sprintf
+    $ node proximity-test.py
+
+## Install sound
+
+The hard thing here is that we want multiple sound sources to play simulateously.
+
+**Ref:** https://stackoverflow.com/questions/14398573/alsa-api-how-to-play-two-wave-files-simultaneously
+
+> ALSA does not provide a mixer. If you need to play multiple audio streams at the same time, you need to mix them together on your own.
+
+and
+
+> You can configure ALSA's dmix plugin to allow multiple applications to share input/output devices.
+
+The answer which also provides a possible ALSA configuration using the dmix plugin.
+
+**Ref:** https://stackoverflow.com/questions/39487291/polyphonic-audio-playback-with-node-js-on-raspberry-pi
+**Ref:** https://github.com/audiojs/web-audio-api
+**Ref:** https://github.com/TooTallNate/node-speaker
+
+The first says:
+
+>  aplay/mpg123/some other program - allows me to only play single sound at once
+
+and offers an example of using two node modules ```web-audio-api``` and ``node-speaker```
+
+I guess we'll try ALSA aplay first.
+
+
