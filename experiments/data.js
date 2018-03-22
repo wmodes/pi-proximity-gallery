@@ -25,11 +25,15 @@ module.exports.beacons = [
     },
 ]
 
-module.exports.distLogLength = 20;
+module.exports.rssiLogLength = 50;
 
 module.exports.distAlpha = 0.75;
 
 module.exports.kalman = {
-    'R' : 0.01,
-    'Q' : 3
+    //'R' : 0.01,
+    //'R' : 0.1,
+    //'R' : 0.5,
+    'R' : 10,
+    //'Q' : 3
+    'Q' : 0.00001
 }

@@ -13,6 +13,7 @@ var KalmanFilter = require('kalmanjs').default;
 
 var kalmanFilter = new KalmanFilter({R: data.kalman.R, Q: data.kalman.Q});
 var bleacons = {};
+var foundCount = 0;
 
 //
 // setup data
@@ -68,30 +69,21 @@ Bleacon.on('discover', function(bleacon) {
     id = bleacon.uuid + "+" + bleacon.major + "+" + bleacon.minor;
     //console.log("id:",id);
     if (id in bleacons) {
-        distEst = calculateDistance(bleacon.measuredPower, bleacon.rssi);
         // add missing data to bleacon objects
-        if (!('distData' in bleacons[id])) {
-            bleacons[id].distData = [];
+        if (!('rssiData' in bleacons[id])) {
+            bleacons[id].rssiData = [];
         } 
-        //if (!('distSmooth' in bleacons[id])) {
-        //    bleacons[id].distSmooth = distEst;
-        //} 
-        // keep a rolling log of distance estimates
-        bleacons[id].distData.push(distEst);
-        while (bleacons[id].distData.length > data.distLogLength) {
-            bleacons[id].distData.shift();
+        // keep a rolling log of rssi data
+        bleacons[id].rssiData.push(bleacon.rssi);
+        while (bleacons[id].rssiData.length > data.rssiLogLength) {
+            bleacons[id].rssiData.shift();
         }
-        //// calc smoothed distance
-        //var alpha = data.distAlpha;
-        //bleacons[id].distSmooth = (alpha * distEst) + ((1 - alpha) * bleacons[id].distSmooth);
-        //// average distance
-        //bleacons[id].distAvg = dataMean(bleacons[id].distData);
-
-        // Use Kalman filter on dist data
-        bleacons[id].kalmanData = bleacons[id].distData.map(function(v) {
+        // Use Kalman filter on rssi data
+        var kalmanData = bleacons[id].rssiData.map(function(v) {
             return kalmanFilter.filter(v);
         });
-        bleacons[id].kalmanAvg = dataMean(bleacons[id].kalmanData);
+        var kalmanAvg = dataMean(kalmanData);
+        var distEst = calculateDistance(bleacon.measuredPower, kalmanAvg);
 
         //console.log(bleacons[id]);
         //console.log("name:", bleacons[id].name, 
@@ -102,8 +94,7 @@ Bleacon.on('discover', function(bleacon) {
             //"kalman mean:", bleacons[id].kalmanAvg.toFixed(2), 
             //"prox:", bleacon.proximity);
 
-        displayData(bleacons[id].index, bleacons[id].name, bleacon.measuredPower, 
-            bleacon.rssi, bleacons[id].kalmanAvg, bleacon.proximity);
+        displayData(bleacons[id].index, bleacons[id].name, bleacon.measuredPower, kalmanAvg, distEst);
     }
 });
 
@@ -111,32 +102,35 @@ Bleacon.on('discover', function(bleacon) {
 // display
 //
 
-function displayData(index, name, power, rssi, kalman, prox) {
+function displayData(index, name, power, rssi, dist, prox) {
     var width = process.stdout.columns;
     var height = process.stdout.rows;
     var numBeacons = Object.keys(bleacons).length;
     //var row = Math.round(index * (height/numBeacons));
-    var row = Math.round((index + 1) * 3);
-    var header = "Name    Power   RSSI    Kalman    "
-    var data = sprintf("%-7s  %4d   %4d     %5.1f   ", name, power, rssi, kalman, prox);
+    var row = Math.round((index + 1) * 4);
+    var header = sprintf("%-7s %7s %7s %7s    ","Name","Power","RSSI","Dist");
+    var data =   sprintf("%-7s %7d %7d %7.1fm  ", name, power, rssi, dist, prox);
     var pos = header.length + 8;
     var size = width - pos;
     var scale = "";
     var scaleCount = 0;
-    while (scaleCount < size) {
+    while (scaleCount < size/2) {
         scale += sprintf("%-10d", scaleCount);
-        scaleCount = scaleCount + 10;
+        scaleCount = scaleCount + 5;
     }
     //console.log("size:",size,"scaleCount",scaleCount);
-    var scaled = Math.round(kalman);
+    var scaled = Math.round(dist*2);
     var indicator = sprintf("[%"+scaled+"s%"+(size-scaled)+"s","@","]");
 
     //console.log("num:",numBeacons,"index:",index,"row:",row);
     console.log(ansi.cursorTo(0, row) + header + scale);
     console.log(data + indicator);
-    console.log("size:",size,"scaled:",scaled);
-    
-    
+    //console.log("size:",size,"scaled:",scaled,"      ");
+
+    foundCount++;
+    if (foundCount % 100 == 0) {
+        console.log(ansi.eraseScreen);
+    }
 }
 
 function main() {
