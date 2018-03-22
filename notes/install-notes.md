@@ -393,3 +393,6 @@ And then:
 
 Great.
 
+## Install more required packages
+
+    $ npm install ansi-escapes sprintf
