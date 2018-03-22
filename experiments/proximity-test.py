@@ -107,9 +107,12 @@ function displayData(index, name, power, rssi, dist, prox) {
     var height = process.stdout.rows;
     var numBeacons = Object.keys(bleacons).length;
     //var row = Math.round(index * (height/numBeacons));
-    var row = Math.round((index + 1) * 4);
+    var title1 = "iBEACON SENSING WITH KALMAN FILTERING OVER A ROLLLING LOG";
+    var title2 = sprintf("Log Length: %d, Kalman (R:%f, Q:%f)", 
+                        data.rssiLogLength, data.kalman.R, data.kalman.Q);
+    var row = Math.round((index + 1) * 4 + 2);
     var header = sprintf("%-7s %7s %7s %7s    ","Name","Power","RSSI","Dist");
-    var data =   sprintf("%-7s %7d %7d %7.1fm  ", name, power, rssi, dist, prox);
+    var dataLine =   sprintf("%-7s %7d %7d %7.1fm  ", name, power, rssi, dist, prox);
     var pos = header.length + 8;
     var size = width - pos;
     var scale = "";
@@ -123,8 +126,10 @@ function displayData(index, name, power, rssi, dist, prox) {
     var indicator = sprintf("[%"+scaled+"s%"+(size-scaled)+"s","@","]");
 
     //console.log("num:",numBeacons,"index:",index,"row:",row);
+    console.log(ansi.cursorTo(Math.round((width/2)-(title1.length/2)),0) + title1);
+    console.log(ansi.cursorTo(Math.round((width/2)-(title2.length/2)),1) + title2);
     console.log(ansi.cursorTo(0, row) + header + scale);
-    console.log(data + indicator);
+    console.log(dataLine + indicator);
     //console.log("size:",size,"scaled:",scaled,"      ");
 
     foundCount++;
