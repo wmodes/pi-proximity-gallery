@@ -1,27 +1,38 @@
-var data = require('./data.js')
+var data = require('./data.js');
 var Bleacon = require('bleacon'); 
+const ansi = require('ansi-escapes');
+var sprintf = require("sprintf-js").sprintf,
+    vsprintf = require("sprintf-js").vsprintf;
+
+// setup kalman filter
 var KalmanFilter = require('kalmanjs').default;
+
+//
+// globals
+//
+
+var kalmanFilter = new KalmanFilter({R: data.kalman.R, Q: data.kalman.Q});
+var bleacons = {};
 
 //
 // setup data
 //
 
 // make indexed object
-var bleacons = {};
-for (var i=0; i<data.beacons.length; i++) {
-    id = data.beacons[i].uuid + "+" + data.beacons[i].major + "+" + data.beacons[i].minor;
-    bleacons[id] = data.beacons[i];
+function makeIndexedObject(beaconsArray) {
+    var bleacons = {};
+    for (var i=0; i<beaconsArray.length; i++) {
+        id = beaconsArray[i].uuid + "+" + beaconsArray[i].major + "+" + beaconsArray[i].minor;
+        bleacons[id] = beaconsArray[i];
+    }
+    return bleacons;
 }
-
-// setup kalman filter
-var kalmanFilter = new KalmanFilter({R: data.kalman.R, Q: data.kalman.Q});
 
 //
 // maths
 //
 
 function calculateDistance(txPower, rssi) {
-  
   if (rssi == 0) {
     return -1.0; 
   }
@@ -48,7 +59,9 @@ function dataMean(array) {
 // initiate scanning
 //
 
-Bleacon.startScanning();
+function startScanning() {
+    Bleacon.startScanning();
+}
 
 Bleacon.on('discover', function(bleacon) {
     //console.log("bleacon:", bleacon);
@@ -81,12 +94,55 @@ Bleacon.on('discover', function(bleacon) {
         bleacons[id].kalmanAvg = dataMean(bleacons[id].kalmanData);
 
         //console.log(bleacons[id]);
-        console.log("name:", bleacons[id].name, 
+        //console.log("name:", bleacons[id].name, 
             //" power:", bleacon.measuredPower, 
             //"rssi:", bleacon.rssi, "accu:", bleacon.accuracy.toFixed(2), 
             //"smooth dist:", bleacons[id].distSmooth.toFixed(2), 
             //"dist mean:", bleacons[id].distAvg.toFixed(2), 
-            "kalman mean:", bleacons[id].kalmanAvg.toFixed(2), 
-            "prox:", bleacon.proximity);
+            //"kalman mean:", bleacons[id].kalmanAvg.toFixed(2), 
+            //"prox:", bleacon.proximity);
+
+        displayData(bleacons[id].index, bleacons[id].name, bleacon.measuredPower, 
+            bleacon.rssi, bleacons[id].kalmanAvg, bleacon.proximity);
     }
 });
+
+//
+// display
+//
+
+function displayData(index, name, power, rssi, kalman, prox) {
+    var width = process.stdout.columns;
+    var height = process.stdout.rows;
+    var numBeacons = Object.keys(bleacons).length;
+    //var row = Math.round(index * (height/numBeacons));
+    var row = Math.round((index + 1) * 3);
+    var header = "Name    Power   RSSI    Kalman    "
+    var data = sprintf("%-7s  %4d   %4d     %5.1f   ", name, power, rssi, kalman, prox);
+    var pos = header.length + 8;
+    var size = width - pos;
+    var scale = "";
+    var scaleCount = 0;
+    while (scaleCount < size) {
+        scale += sprintf("%-10d", scaleCount);
+        scaleCount = scaleCount + 10;
+    }
+    //console.log("size:",size,"scaleCount",scaleCount);
+    var scaled = Math.round(kalman);
+    var indicator = sprintf("[%"+scaled+"s%"+(size-scaled)+"s","@","]");
+
+    //console.log("num:",numBeacons,"index:",index,"row:",row);
+    console.log(ansi.cursorTo(0, row) + header + scale);
+    console.log(data + indicator);
+    console.log("size:",size,"scaled:",scaled);
+    
+    
+}
+
+function main() {
+    bleacons = makeIndexedObject(data.beacons);
+    console.log(ansi.eraseScreen,ansi.cursorHide);
+    startScanning();
+}
+
+main();
