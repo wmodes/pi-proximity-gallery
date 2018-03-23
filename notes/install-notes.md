@@ -384,30 +384,123 @@ Great.
 
 ## Install sound
 
-The hard thing here is that we want multiple sound sources to play simulateously.
+First, let's see if sound works. I've already downloaded a wav file.
 
-**Ref:** https://stackoverflow.com/questions/14398573/alsa-api-how-to-play-two-wave-files-simultaneously
+    $ omxplayer sounds/393024__axiologus__heavy-stream-with-birds.wav
+
+And it outputs to the headphone jack. Good.
+
+Let's get alsa player and controls...
+
+    $ sudo apt-get install alsa-base alsa-utils
+    [sudo] password for wmodes: 
+    Reading package lists... Done
+    Building dependency tree       
+    Reading state information... Done
+    alsa-base is already the newest version (1.0.27+1).
+    alsa-utils is already the newest version (1.1.3-1).
+    0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+
+Already installed on raspian stretch. Great.
+
+Test it:
+
+    $ aplay sounds/393024__axiologus__heavy-stream-with-birds.wav
+
+Pump up the volume:
+
+    $ amixer cset iface=MIXER,name='PCM Playback Volume' 100%
+    $ aplay sounds/393024__axiologus__heavy-stream-with-birds.wav
+
+Yes.
+
+## A Sound Test with Node
+
+**Ref:** https://github.com/pmelander/node-aplay
+
+The hard thing here is that we want multiple sound sources to play simulateously.
 
 > ALSA does not provide a mixer. If you need to play multiple audio streams at the same time, you need to mix them together on your own.
 
-and
-
-> You can configure ALSA's dmix plugin to allow multiple applications to share input/output devices.
-
-The answer which also provides a possible ALSA configuration using the dmix plugin.
+A totally different approach:
 
 **Ref:** https://stackoverflow.com/questions/39487291/polyphonic-audio-playback-with-node-js-on-raspberry-pi
-**Ref:** https://github.com/audiojs/web-audio-api
-**Ref:** https://github.com/TooTallNate/node-speaker
-
-The first says:
 
 >  aplay/mpg123/some other program - allows me to only play single sound at once
 
 and offers an example of using two node modules ```web-audio-api``` and ``node-speaker```
 
-I guess we'll try ALSA aplay first.
+We'll try ALSA aplay first if we can get it to work.
 
     $ npm install node-aplay
+
+And create ```aplay-test.js```
+
+	$ cat aplay-test.js 
+	var Sound = require('node-aplay');
+
+	// fire and forget:
+	//new Sound('./sounds/393024__axiologus__heavy-stream-with-birds.wav').play();
+
+	// with ability to pause/resume:
+	var music = new Sound('./sounds/393024__axiologus__heavy-stream-with-birds.wav');
+	music.play();
+
+	setTimeout(function () {
+		music.pause(); // pause the music after five seconds
+		console.log('Paused');
+	}, 5000);
+
+	setTimeout(function () {
+		music.resume(); // and resume it two seconds after pausing
+		console.log('Resumed');
+	}, 8000);
+
+	// you can also listen for various callbacks:
+	music.on('complete', function () {
+		console.log('Done with playback!');
+	});
+
+And run:
+
+	$ node aplay-test.js 
+	Paused
+	Resumed
+	Done with playback!
+
+Okay. Good. But can we make it play more than one sound at a time?
+
+## Simulaneous sounds
+
+One approach using ALSA:
+
+**Ref:** https://stackoverflow.com/questions/14398573/alsa-api-how-to-play-two-wave-files-simultaneously
+
+> You can configure ALSA's dmix plugin to allow multiple applications to share input/output devices.
+
+The answer which also provides a possible ALSA configuration using the dmix plugin.
+
+Unfortunately, I also discovered that ```aplay``` won't decode mp3 or flac. Hmm.
+
+I can install flac and mpe3 bindings and use different library calls. But can I get them to all play through the amixer?
+
+### the node-groove library
+
+	$ sudo apt-get install  libgroove-dev libgrooveplayer-dev libgrooveloudness-dev libgroovefingerprinter-dev
+	$ npm install --save groove    
+
+Create a first test:
+
+	$ vi groove-test.js
+	var groove = require('groove');
+
+	groove.open("sounds/9369__833-45__sweep01.flac", function(err, file) {
+	  if (err) throw err;
+	  console.log(file.metadata());
+	  console.log("duration:", file.duration());
+	  file.close(function(err) {
+		if (err) throw err;
+	  });
+	});
 
 
