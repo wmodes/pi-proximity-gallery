@@ -408,4 +408,6 @@ and offers an example of using two node modules ```web-audio-api``` and ``node-s
 
 I guess we'll try ALSA aplay first.
 
+    $ npm install node-aplay
+
 
