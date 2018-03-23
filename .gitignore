@@ -59,6 +59,7 @@ typings/
 
 # MacOS Artifacts
 Icon*
+.DS_Store
 
 # Vim Swp files
 .*.swp
