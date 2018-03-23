@@ -422,14 +422,6 @@ The hard thing here is that we want multiple sound sources to play simulateously
 
 > ALSA does not provide a mixer. If you need to play multiple audio streams at the same time, you need to mix them together on your own.
 
-A totally different approach:
-
-**Ref:** https://stackoverflow.com/questions/39487291/polyphonic-audio-playback-with-node-js-on-raspberry-pi
-
->  aplay/mpg123/some other program - allows me to only play single sound at once
-
-and offers an example of using two node modules ```web-audio-api``` and ``node-speaker```
-
 We'll try ALSA aplay first if we can get it to work.
 
     $ npm install node-aplay
@@ -472,6 +464,8 @@ Okay. Good. But can we make it play more than one sound at a time?
 
 ## Simulaneous sounds
 
+Lots of good ideas here: https://stackoverflow.com/questions/12543237/play-audio-with-node-js
+
 One approach using ALSA:
 
 **Ref:** https://stackoverflow.com/questions/14398573/alsa-api-how-to-play-two-wave-files-simultaneously
@@ -485,6 +479,8 @@ Unfortunately, I also discovered that ```aplay``` won't decode mp3 or flac. Hmm.
 I can install flac and mpe3 bindings and use different library calls. But can I get them to all play through the amixer?
 
 ### the node-groove library
+
+**Ref:** https://github.com/andrewrk/node-groove
 
 	$ sudo apt-get install  libgroove-dev libgrooveplayer-dev libgrooveloudness-dev libgroovefingerprinter-dev
 	$ npm install --save groove    
@@ -502,5 +498,111 @@ Create a first test:
 		if (err) throw err;
 	  });
 	});
+
+I was able to extract metadata, but wasn't able to start a player. 
+
+	$ node groove-test.js sounds/9369__833-45__sweep01.flac 
+	/home/wmodes/pi-proximity-gallery/experiments/groove-test.js:11
+	groove.connectSoundBackend();
+		   ^
+	TypeError: groove.connectSoundBackend is not a function
+
+So reinstall from the github repo. But then this happened:
+
+	$ npm install https://github.com/andrewrk/node-groove/tarball/master
+	\
+	> groove@2.4.0 install /home/wmodes/pi-proximity-gallery/experiments/node_modules/groove
+	> node-gyp rebuild
+
+	make: Entering directory '/home/wmodes/pi-proximity-gallery/experiments/node_modules/groove/build'
+	  CXX(target) Release/obj.target/groove/src/player.o
+	In file included from ../src/player.cc:1:0:
+	../src/player.h:6:27: fatal error: groove/player.h: No such file or directory
+	 #include <groove/player.h>
+
+Grrr. Put in an issue at github: https://github.com/andrewrk/node-groove/issues/37
+
+Let's try another node module.
+
+### Using web-audio-api
+
+A totally different approach:
+
+**Ref:** https://stackoverflow.com/questions/39487291/polyphonic-audio-playback-with-node-js-on-raspberry-pi
+
+>  aplay/mpg123/some other program - allows me to only play single sound at once
+
+and offers an example of using two node modules ```web-audio-api``` and ``node-speaker```
+
+    $ sudo apt-get install libasound2-dev
+    $ npm install speaker
+    $ npm install web-audio-api
+
+Creating a test file, we _can_ get the audio to play at the same time. Woot.
+
+	$ cat web-audio-test.js 
+	var AudioContext = require('web-audio-api').AudioContext;
+	var Speaker      = require('speaker');
+	var fs           = require('fs');
+
+	var track1       = './sounds/393024__axiologus__heavy-stream-with-birds.mp3';
+	var track2       = './sounds/9369__833-45__sweep01.wav';
+
+	var context      = new AudioContext();
+
+	console.log("Create context");
+	context.outStream = new Speaker({
+	  channels:   context.format.numberOfChannels,
+	  bitDepth:   context.format.bitDepth,
+	  sampleRate: context.format.sampleRate
+	});
+
+	function play(audioBuffer) {
+	  if (!audioBuffer) { return; }
+
+	  var bufferSource = context.createBufferSource();
+
+	  bufferSource.connect(context.destination);
+	  bufferSource.buffer = audioBuffer;
+	  bufferSource.loop   = false;
+	  bufferSource.start(0);
+	}
+
+	console.log("Reading files");
+	var audioData1 = fs.readFileSync(track1);
+	var audioData2 = fs.readFileSync(track2);
+
+	var audioBuffer1, audioBuffer2;
+
+	console.log("Decode track1");
+	context.decodeAudioData(audioData1, function(audioBuffer) {
+	  console.log("Decode track1 - done");
+	  audioBuffer1 = audioBuffer;
+	  if (audioBuffer1 && audioBuffer2) { playBoth(); }
+	});
+
+	console.log("Decode track2");
+	context.decodeAudioData(audioData2, function(audioBuffer) {
+	  console.log("Decode track2 - done");
+	  audioBuffer2 = audioBuffer;
+	  if (audioBuffer1 && audioBuffer2) { playBoth(); }
+	});
+
+	function playBoth() {
+	  console.log('playing track 1...');
+	  play(audioBuffer1);
+
+	  console.log('5 second delay');
+		setTimeout(function () {
+			console.log('playing track 2...');
+			play(audioBuffer2);
+		}, 5000);
+	}
+
+Great. Except...
+
+> This interface represents a memory-resident audio asset (for one-shot sounds and other short audio clips). Its format is non-interleaved IEEE 32-bit linear PCM with a nominal range of -1 -> +1. It can contain one or more channels. Typically, it would be expected that the length of the PCM data would be fairly short (usually somewhat less than a minute). For longer sounds, such as music soundtracks, streaming should be used with the audio element and MediaElementAudioSourceNode.
+
+**Source:** https://stackoverflow.com/questions/46327268/audiobuffer-not-cachable-decodeaudiodata-takes-to-long
 
 
