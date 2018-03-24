@@ -529,6 +529,7 @@ Let's try another node module.
 A totally different approach:
 
 **Ref:** https://stackoverflow.com/questions/39487291/polyphonic-audio-playback-with-node-js-on-raspberry-pi
+**Ref:** https://www.html5rocks.com/en/tutorials/webaudio/intro/
 
 >  aplay/mpg123/some other program - allows me to only play single sound at once
 
