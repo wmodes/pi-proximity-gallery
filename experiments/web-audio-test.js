@@ -4,9 +4,10 @@ var fs = require('fs');
 var readline = require('readline-sync');
 
 var tracks = [
+    './sounds/9369__833-45__sweep01.wav',
+    './sounds/272168__dethrok__cicadas.mp3',
+    './sounds/399744__inspectorj__ambience-florida-frogs-gathering-a.mp3',
     './sounds/393024__axiologus__heavy-stream-with-birds.mp3',
-    'sounds/399744__inspectorj__ambience-florida-frogs-gathering-a.mp3',
-    './sounds/9369__833-45__sweep01.wav'
 ];
 
 var context      = new AudioContext();
@@ -31,65 +32,136 @@ for (i=0; i<tracks.length; i++) {
             console.log("Decode track", index, "- done");
             audioBuffer[index] = newBuffer;
             if (audioBuffer.every(x => x)) {
-                playAll();
+                //playAll();
+                simpleTest();
             }
         });
     })(i);
 }
 
 function play(audioBuffer) {
-  if (!audioBuffer) { return; }
-  var bufferSource = context.createBufferSource();
-  bufferSource.connect(context.destination);
-  bufferSource.buffer = audioBuffer;
-  bufferSource.loop   = false;
-  bufferSource.start(0);
+    if (!audioBuffer) { return; }
+    console.log("Playing");
+    var bufferSource = context.createBufferSource();
+    bufferSource.connect(context.destination);
+    bufferSource.buffer = audioBuffer;
+    bufferSource.loop   = false;
+    bufferSource.start(0);
 }
 
 function playloop(audioBuffer) {
-  if (!audioBuffer) { return; }
-  var bufferSource = context.createBufferSource();
-  bufferSource.connect(context.destination);
-  bufferSource.buffer = audioBuffer;
-  bufferSource.loop   = true;
-  bufferSource.start(0);
+    if (!audioBuffer) { return; }
+    console.log("Playing");
+    var bufferSource = context.createBufferSource();
+    bufferSource.connect(context.destination);
+    bufferSource.buffer = audioBuffer;
+    bufferSource.loop   = true;
+    bufferSource.start(0);
 }
 
 function pause(audioBuffer) {
-  if (!audioBuffer) { return; }
-  var bufferSource = context.createBufferSource();
-  bufferSource.connect(context.destination);
-  bufferSource.buffer = audioBuffer;
-  bufferSource.stop(0);
+    if (!audioBuffer) { return; }
+    console.log("Pausing");
+    var bufferSource = context.createBufferSource();
+    bufferSource.connect(context.destination);
+    bufferSource.buffer = audioBuffer;
+    bufferSource.stop(0);
+}
+
+function wait(ms){
+     var start = new Date().getTime();
+     var end = start;
+     while(end < start + ms) {
+        end = new Date().getTime();
+     }
 }
 
 function playAll() {
     var playing = next = 0;
     while (true) {
-        playloop(audioBuffer[next]);
+        play(audioBuffer[1]);
         playing = next;
-        next = parseInt(readline.question("Next file (0-"+(tracks.length-2)+")? "));
-        if (next == -1) {
-            console.log("break");
-            break;
+        //next = parseInt(readline.question("Next file (1-"+(tracks.length-1)+")? "));
+        //console.log("Input:", next);
+        //if (next == -1) {
+            //console.log("break");
+            //break;
+        //}
+        wait(5000);
+        next++;
+        if (next >= tracks.length) {
+            next = 1;
         }
         console.log("["+next+"] "+tracks[next]);
-        play(audioBuffer[tracks.length-1]);
+        play(audioBuffer[0]);
         //pause(audioBuffer[playing]);
     }
     process.exit();
+}
 
-//    console.log('playing track 1...');
-//    play(audioBuffer[0]);
-//
-//    setTimeout(function () {
-//        console.log('playing track 3...');
-//        play(audioBuffer[2]);
-//    }, 5000);
-//
-//    setTimeout(function () {
-//        console.log('playing track 2...');
-//        play(audioBuffer[1]);
-//    }, 6000);
+function simpleTest() {
+    console.log('playing track 1...');
+    playloop(audioBuffer[1]);
+
+    setTimeout(function () {
+        console.log('playing track 0...');
+        play(audioBuffer[0]);
+    }, 5000);
+
+    setTimeout(function () {
+        console.log('pausing track 1...');
+        pause(audioBuffer[1]);
+        console.log('playing track 2...');
+        playloop(audioBuffer[2]);
+    }, 6000);
+
+    setTimeout(function () {
+        console.log('playing track 0...');
+        play(audioBuffer[0]);
+    }, 11000);
+
+    setTimeout(function () {
+        console.log('pausing track 2...');
+        pause(audioBuffer[2]);
+        console.log('playing track 3...');
+        playloop(audioBuffer[3]);
+    }, 12000);
 
 }
+
+function seqTest() {
+    console.log('playing track 1...');
+    playloop(audioBuffer[1]);
+    
+    wait(5000);
+
+    //setTimeout(function () {
+    console.log('playing track 0...');
+    play(audioBuffer[0]);
+    //}, 5000);
+    console.log('pausing track 1...');
+    pause(audioBuffer[1]);
+    
+    wait(1000);
+    
+    //setTimeout(function () {
+    console.log('playing track 2...');
+    playloop(audioBuffer[2]);
+    //}, 6000);
+    
+    wait(5000);
+    
+    //setTimeout(function () {
+    console.log('playing track 0...');
+    play(audioBuffer[0]);
+    //}, 5000);
+    console.log('pausing track 2...');
+    pause(audioBuffer[2]);
+    
+    wait(1000);
+    
+    //setTimeout(function () {
+    console.log('playing track 3...');
+    playloop(audioBuffer[3]);
+    //}, 6000);
+}  
