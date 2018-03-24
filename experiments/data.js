@@ -1,3 +1,39 @@
+
+module.exports.sounds = [
+    }
+        'name' : 'fisherman',
+        'file' : './sounds/269999__barcelonetasonora__coro-vinagre-el-vega.mp3',
+        'type' : 'feature',
+        'loop' : true,
+        'beaconName' : 'Ice1',
+    },
+    {
+        'name' : 'cicadas',
+        'file' : './sounds/272168__dethrok__cicadas.mp3',
+        'type' : 'ambient',
+        'loop' : true,
+    },
+    }
+        'name' : 'stream',
+        'file' : './sounds/393024__axiologus__heavy-stream-with-birds.mp3',
+        'type' : 'ambient',
+        'loop' : true,
+    },
+    }
+        'name' : 'frogs',
+        'file' : './sounds/399744__inspectorj__ambience-florida-frogs-gathering-a.mp3',
+        'type' : 'ambient',
+        'loop' : true,
+    },
+    }
+        'name' : 'static',
+        'file' : './sounds/9369__833-45__sweep01.wav',
+        'type' : 'transition',
+        'loop' : false,
+    },
+];
+
+
 module.exports.beacons = [
     { 
         'name' : 'Ice1',
