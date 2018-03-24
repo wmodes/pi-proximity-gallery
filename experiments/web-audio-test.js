@@ -1,12 +1,7 @@
 var AudioContext = require('web-audio-api').AudioContext;
 var Speaker = require('speaker');
 var fs = require('fs');
-var rl = require('readline');
-
-var prompt = rl.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+var readline = require('readline-sync');
 
 var tracks = [
     './sounds/393024__axiologus__heavy-stream-with-birds.mp3',
@@ -23,10 +18,11 @@ context.outStream = new Speaker({
   sampleRate: context.format.sampleRate
 });
 
-console.log("Reading files");
 var audioBuffer = Array.apply(null, Array(tracks.length)).map(function () {});
 var audioData = Array.apply(null, Array(tracks.length)).map(function () {});
-for (i=tracks.length-1; i>=0; i--) {
+
+console.log("Reading files");
+for (i=0; i<tracks.length; i++) {
     console.log("track", i, ":", tracks[i]);
     audioData[i] = fs.readFileSync(tracks[i]);
     console.log("Decode track", i);
@@ -68,23 +64,20 @@ function pause(audioBuffer) {
 }
 
 function playAll() {
-
     var playing = next = 0;
-    var exit = false;
-
-    while (! exit) {
-        play(audioBuffer[next]);
+    while (true) {
+        playloop(audioBuffer[next]);
         playing = next;
-        //next = parseInt(readline("Next file (0-"+(tracks.length-2)+")? "));
-		prompt.question("Next file (0-"+(tracks.length-2)+")? ", function(answer) {
-			next = parseInt(answer);
-        });
+        next = parseInt(readline.question("Next file (0-"+(tracks.length-2)+")? "));
         if (next == -1) {
-            exit = true;
+            console.log("break");
+            break;
         }
+        console.log("["+next+"] "+tracks[next]);
         play(audioBuffer[tracks.length-1]);
-        pause(audioBuffer[playing]);
+        //pause(audioBuffer[playing]);
     }
+    process.exit();
 
 //    console.log('playing track 1...');
 //    play(audioBuffer[0]);
