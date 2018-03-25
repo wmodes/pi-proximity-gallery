@@ -1,3 +1,5 @@
+"use strict";
+
 var data = require('./data.js');
 var AudioContext = require('web-audio-api').AudioContext;
 var Speaker = require('speaker');
@@ -21,13 +23,30 @@ var context;
 var sounds = data.sounds;;
 
 //
+// classes
+//
+
+class Sound {
+    constructor(soundObj) {
+        this.storeSoundObj(soundObj);
+    }
+    storeSoundObj(soundObj) {
+        var attrib = Object.keys(soundObj);
+        for (i=0; i<attrib.length; i++) {
+            this[attrib[i]] = sound[attrib[i]];
+        }
+    }
+}
+
+//
 // Setup
 //
 
-function audioSetup () {
-    var context      = new AudioContext();
+function prepData(sounds) {
 
+function audioSetup () {
     console.log("Create context");
+    var context      = new AudioContext();
     context.outStream = new Speaker({
         channels:   context.format.numberOfChannels,
         bitDepth:   context.format.bitDepth,
@@ -35,27 +54,26 @@ function audioSetup () {
     });
 }
 
-function audioLoader() {
+function audioLoader(sounds) {
 
     // instead we add these to the sounds objects
     //var audioBuffer = Array.apply(null, Array(tracks.length)).map(function () {});
     //var audioData = Array.apply(null, Array(tracks.length)).map(function () {});
 
     console.log("Reading files");
-    for (i=0; i<tracks.length; i++) {
-        console.log("track", i, ":", tracks[i]);
-        audioData[i] = fs.readFileSync(tracks[i]);
-        console.log("Decode track", i);
-        (function(index) {
-            context.decodeAudioData(audioData[index], function(newBuffer) {
-                console.log("Decode track", index, "- done");
-                audioBuffer[index] = newBuffer;
-                if (audioBuffer.every(x => x)) {
+    for (audioId=0; audioId<sounds.length; audioId++) {
+        sounds[audioId].audioData = fs.readFileSync(sounds[audioId].file);
+        console.log("Decode track", audioId);
+        (function(myAudioId) {
+            context.decodeAudioData(audioData[myAudioId], function(newBuffer) {
+                console.log("Decode track", myAudioId, "- done");
+                sounds[myAudioId].audioBuffer = newBuffer;
+                if (audioBuffer.every(x => x.audioBuffer)) {
                     //playAll();
                     simpleTest();
                 }
             });
-        })(i);
+        })(audioId);
     }
 
 function play(audioBuffer) {
