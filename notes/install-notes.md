@@ -47,16 +47,22 @@ Check that worked:
 
     $ egrep "pi|wmodes" /etc/group
 
-## Fine Tune Install
+## Login without password
 
 Upload ssh key from back on your laptop:
 
-    $ ssh-copy-id -i ~/.ssh/id_rsa.pub wmodes@prox1.local
+    laptop:~ $ ssh-copy-id -i ~/.ssh/id_rsa.pub wmodes@prox1.local
     Warning: the RSA host key for 'prox1.local' differs from the key for the IP address '192.168.0.37'
     Offending key for IP in /Users/wmodes/.ssh/known_hosts:9
     Matching host key in /Users/wmodes/.ssh/known_hosts:12
     Are you sure you want to continue connecting (yes/no)? yes
     wmodes@prox1.local's password: 
+
+Check that it worked:
+
+    laptop:~ $ ssh wmodes@prox1.local
+
+## Fine Tune Install
 
 Install vim:
 
@@ -68,7 +74,7 @@ Edit vimrc:
     
     filetype plugin indent on
     syntax on " enabled syntax highlighting
-    :set number " line numbers
+    ":set number " line numbers
     :set ai " autoindent
     :set tabstop=4 " sets tabs to 4 characters
     :set shiftwidth=4
@@ -113,6 +119,11 @@ Get the public key:
 
 Copy that and go to https://github.com/settings/ssh/new and paste the key in.
 
+Identify yo'self to git locally:
+
+    $ git config --global user.email "wmodes@gmail.com"
+    $ git config --global user.name "Wes Modes"
+
 ## Setup local dev directories
 
 Clone the pi-proximity-gallery repo:
@@ -142,7 +153,7 @@ We can restore from this backup, similar to how we wrote our card originally. **
     $ diskutil unmount /dev/disk1s1
     $ gunzip -c 2018-03-18-raspian-stretch-basic.gz | sudo dd of=/dev/disk1 bs=4m 
 
-## Update
+## Update repo
 
 If you have just restored from an image backup, you may have to update what has happened since the last backup. Login and go into the repo:
 
@@ -206,7 +217,6 @@ So yes. Good.
     [NEW] Device D2:C4:81:51:C4:B6 D2-C4-81-51-C4-B6
 
 Without this, stuff doesn't seem to work.
-
 ## Upgrade to newer version of node
 
 **Ref:** https://stackoverflow.com/questions/10075990/upgrading-node-js-to-latest-version
@@ -220,28 +230,9 @@ since I've spun out in a cascading series of desperate module deletions, reinsta
 every method.
 
 Also, I'm suspicous of any method that installs modules locally rather than globally. But now tha I'm paying
-closer attention, perhaps they all do?
+closer attention, perhaps they all do? Eventually, I discovered npm's -g (global) flag which installs them for everyone rather than locally.
 
-## Install needed packages
-
-    $ npm install noble bleacon
-
-And make sure our tests work:
-
-    $ sudo node noble-test.js
-    $ sudo node bleacon-test.js
-
-However,
-
-    $ sudo node proximity-test.py 
-    module.js:327
-        throw err;
-        ^
-
-    Error: Cannot find module 'kalmanjs'
-        
-I need the kalmanjs module:
-
+<<<<<<< HEAD
     $ npm install kalmanjs
     npm ERR! notarget No compatible version found: kalmanjs@'*'
     npm ERR! notarget Valid install targets:
@@ -256,8 +247,7 @@ So this is why I started updating node.
 If we install node 8.x, we can compile this module successfully, but :-( the other modules no longer work.
 
 
-
-## Install n module to manage node version (don't do this)
+### Install n module to manage node version (don't do this)
 
     $ node -v
     v4.8.2
@@ -265,7 +255,7 @@ If we install node 8.x, we can compile this module successfully, but :-( the oth
     /usr/local/bin/n -> /usr/local/lib/node_modules/n/bin/n
     n@2.1.8 /usr/local/lib/node_modules/n
 
-## Update to latest stable node release (or this)
+### Update to latest stable node release (don't do this)
 
     $ sudo n stable
 
@@ -282,52 +272,353 @@ New version running?
 
 Dude, fuck that.
 
-## Use Node installer to upgrade
+### Use Node installer to upgrade (don't do this)
 
-    $ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+    $ curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
     $ sudo apt-get install -y nodejs
     $ node -v
     v9.8.0
 
+Only problem is this isn't reversible
 
+### Install node version manager
 
-**IGNORE EVERYTHING BELOW HERE (It caused stuff to stop working)**
+    $ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
 
-## Install node version manager
+And as instructed:
 
-    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
+    $ export NVM_DIR="$HOME/.nvm"
+    $ [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-## Upgrade to newer version of node
+### Upgrade to newer version of node
 
-    $ nvm install v8.10.0
-    Downloading and installing node v8.10.0...
-    Downloading https://nodejs.org/dist/v8.10.0/node-v8.10.0-linux-armv7l.tar.xz...
+    $ node -v
+    v4.8.2
+    $ nvm install 4
+    Downloading and installing node v4.8.7...
+    Downloading https://nodejs.org/dist/v4.8.7/node-v4.8.7-linux-armv7l.tar.xz...
     ######################################################################## 100.0%
     Computing checksum with sha256sum
     Checksums matched!
-    Now using node v8.10.0 (npm v5.6.0)
-    Creating default alias: default -> v8.10.0
-
+    Now using node v4.8.7 (npm v2.15.11)
+    Creating default alias: default -> 4 (-> v4.8.7)
     $ node -v
-    v8.10.0
+    v4.8.7
 
-Unfortunately, we're getting errors as we run our experiments. It seems that the modules I'm installing are using the node 4.x install.
+And at this version of node, all of our experiments below work.
 
-## Reinstall node
+But then (Big Reveal), I've been running all of my experiments as root via sudo because they needed 
+permission to access bluetooth functionality. And after all that:
 
-**Do I need to do this? Because this is breaking some of the existing functionality.**
+    $ sudo node -v
+    v4.8.2
 
-    $ sudo apt-get remove npm node nodejs
-    $ sudo rm `which node` `which npm`
-    $ sudo apt remove gyp libjs-inherits libjs-node-uuid
-    $ sudo apt-get update
-    $ sudo apt-get dist-upgrade
+For root, node has been at 4.x all along. I definitely thought that the kalman filters
+were not running with the default version of node. O-kay. So maybe you don't have to do
+anything with the default version of node afterall.
 
-This one was a long install and took a while.
+## Create experiments
 
-    $ curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
-    $ sudo apt-get install -y nodejs
-    $ npm rebuild
-    $ npm rebuild
-    $ npm i -g npm
+I created three experiments.
+
+* A test of noble.js
+* A test of bleacon.js
+* A test of kalman.js
+
+## Install needed packages
+
+    $ npm install noble bleacon ansi-escapes sprintf-js kalmanjs
+
+## Test experiments
+
+Test noble.js:
+
+    $ sudo node noble-test.js 
+    connected to peripheral: d2c48151c4b6
+    noble warning: unknown peripheral d2c48151c4b6
+    connected to peripheral: d7a43b4c4f09
+    noble warning: unknown peripheral d7a43b4c4f09
+    connected to peripheral: f0f410b6aafb
+
+If this seems to do nothing, I've found it helps to run ```sudo bluetoothctl``` above.
+
+Test bleacon.js:
+
+    $ sudo node bleacon-test.js 
+    found bleacon: name: Ice1  power: -59 rssi: -46 accu: 0.4398670722282996 prox: immediate
+    found bleacon: name: Mint1  power: -59 rssi: -47 accu: 0.46855250483641503 prox: immediate
+    found bleacon: name: Ice1  power: -59 rssi: -46 accu: 0.4398670722282996 prox: immediate
+
+Test kalman.js:
+
+    $ sudo node kalman-test.js 
+    Orig data: [ 4, 4, 4, 4, 4, 4 ]
+    Noisy data: [ 5.217560821212828,
+      4.201884876936674,
+      7.56900835223496,
+      4.63440574798733,
+      6.7727666683495045,
+      5.147538051940501 ]
+    Kalman filtered data: [ 5.217560821212828,
+      4.708877860768365,
+      5.667534804528915,
+      4.997955898381812,
+      5.191878377523501,
+      5.187391046589226 ]
+
+Okay, so that's good.
+
+## Don't run at root
+
+But I am still running all of my experiments as root. For this reason:
+
+    $  node bleacon-test.js 
+    bleno warning: adapter state unauthorized, please run as root or with sudo
+                   or see README for information on running without root/sudo:
+                   https://github.com/sandeepmistry/bleno#running-on-linux
+    noble warning: adapter state unauthorized, please run as root or with sudo
+                   or see README for information on running without root/sudo:
+                   https://github.com/sandeepmistry/noble#running-on-linux
+
+But looking at the indicated github, we can:
+
+    $ sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
+
+And then:
+
+    $ node bleacon-test.js 
+    found bleacon: name: Ice1  power: -59 rssi: -46 accu: 0.4398670722282996 prox: immediate
+    found bleacon: name: Mint1  power: -59 rssi: -47 accu: 0.46855250483641503 prox: immediate
+    found bleacon: name: Ice1  power: -59 rssi: -46 accu: 0.4398670722282996 prox: immediate
+
+Great.
+
+## Try the bigger test
+
+    $ node proximity-test.py
+
+## Install sound
+
+First, let's see if sound works. I've already downloaded a wav file.
+
+    $ omxplayer sounds/393024__axiologus__heavy-stream-with-birds.wav
+
+And it outputs to the headphone jack. Good.
+
+Let's get alsa player and controls...
+
+    $ sudo apt-get install alsa-base alsa-utils
+    [sudo] password for wmodes: 
+    Reading package lists... Done
+    Building dependency tree       
+    Reading state information... Done
+    alsa-base is already the newest version (1.0.27+1).
+    alsa-utils is already the newest version (1.1.3-1).
+    0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+
+Already installed on raspian stretch. Great.
+
+Test it:
+
+    $ aplay sounds/393024__axiologus__heavy-stream-with-birds.wav
+
+Pump up the volume:
+
+    $ amixer cset iface=MIXER,name='PCM Playback Volume' 100%
+    $ aplay sounds/393024__axiologus__heavy-stream-with-birds.wav
+
+Yes.
+
+## A Sound Test with Node
+
+**Ref:** https://github.com/pmelander/node-aplay
+
+The hard thing here is that we want multiple sound sources to play simulateously.
+
+> ALSA does not provide a mixer. If you need to play multiple audio streams at the same time, you need to mix them together on your own.
+
+We'll try ALSA aplay first if we can get it to work.
+
+    $ npm install node-aplay
+
+And create ```aplay-test.js```
+
+	$ cat aplay-test.js 
+	var Sound = require('node-aplay');
+
+	// fire and forget:
+	//new Sound('./sounds/393024__axiologus__heavy-stream-with-birds.wav').play();
+
+	// with ability to pause/resume:
+	var music = new Sound('./sounds/393024__axiologus__heavy-stream-with-birds.wav');
+	music.play();
+
+	setTimeout(function () {
+		music.pause(); // pause the music after five seconds
+		console.log('Paused');
+	}, 5000);
+
+	setTimeout(function () {
+		music.resume(); // and resume it two seconds after pausing
+		console.log('Resumed');
+	}, 8000);
+
+	// you can also listen for various callbacks:
+	music.on('complete', function () {
+		console.log('Done with playback!');
+	});
+
+And run:
+
+	$ node aplay-test.js 
+	Paused
+	Resumed
+	Done with playback!
+
+Okay. Good. But can we make it play more than one sound at a time?
+
+## Simulaneous sounds
+
+Lots of good ideas here: https://stackoverflow.com/questions/12543237/play-audio-with-node-js
+
+One approach using ALSA:
+
+**Ref:** https://stackoverflow.com/questions/14398573/alsa-api-how-to-play-two-wave-files-simultaneously
+
+> You can configure ALSA's dmix plugin to allow multiple applications to share input/output devices.
+
+The answer which also provides a possible ALSA configuration using the dmix plugin.
+
+Unfortunately, I also discovered that ```aplay``` won't decode mp3 or flac. Hmm.
+
+I can install flac and mpe3 bindings and use different library calls. But can I get them to all play through the amixer?
+
+### the node-groove library
+
+**Ref:** https://github.com/andrewrk/node-groove
+
+	$ sudo apt-get install  libgroove-dev libgrooveplayer-dev libgrooveloudness-dev libgroovefingerprinter-dev
+	$ npm install --save groove    
+
+Create a first test:
+
+	$ vi groove-test.js
+	var groove = require('groove');
+
+	groove.open("sounds/9369__833-45__sweep01.flac", function(err, file) {
+	  if (err) throw err;
+	  console.log(file.metadata());
+	  console.log("duration:", file.duration());
+	  file.close(function(err) {
+		if (err) throw err;
+	  });
+	});
+
+I was able to extract metadata, but wasn't able to start a player. 
+
+	$ node groove-test.js sounds/9369__833-45__sweep01.flac 
+	/home/wmodes/pi-proximity-gallery/experiments/groove-test.js:11
+	groove.connectSoundBackend();
+		   ^
+	TypeError: groove.connectSoundBackend is not a function
+
+So reinstall from the github repo. But then this happened:
+
+	$ npm install https://github.com/andrewrk/node-groove/tarball/master
+	\
+	> groove@2.4.0 install /home/wmodes/pi-proximity-gallery/experiments/node_modules/groove
+	> node-gyp rebuild
+
+	make: Entering directory '/home/wmodes/pi-proximity-gallery/experiments/node_modules/groove/build'
+	  CXX(target) Release/obj.target/groove/src/player.o
+	In file included from ../src/player.cc:1:0:
+	../src/player.h:6:27: fatal error: groove/player.h: No such file or directory
+	 #include <groove/player.h>
+
+Grrr. Put in an issue at github: https://github.com/andrewrk/node-groove/issues/37
+
+Let's try another node module.
+
+### Using web-audio-api
+
+A totally different approach:
+
+**Ref:** https://stackoverflow.com/questions/39487291/polyphonic-audio-playback-with-node-js-on-raspberry-pi
+**Ref:** https://www.html5rocks.com/en/tutorials/webaudio/intro/
+
+>  aplay/mpg123/some other program - allows me to only play single sound at once
+
+and offers an example of using two node modules ```web-audio-api``` and ``node-speaker```
+
+    $ sudo apt-get install libasound2-dev
+    $ npm install speaker
+    $ npm install web-audio-api
+
+Creating a test file, we _can_ get the audio to play at the same time. Woot.
+
+	$ cat web-audio-test.js 
+	var AudioContext = require('web-audio-api').AudioContext;
+	var Speaker      = require('speaker');
+	var fs           = require('fs');
+
+	var track1       = './sounds/393024__axiologus__heavy-stream-with-birds.mp3';
+	var track2       = './sounds/9369__833-45__sweep01.wav';
+
+	var context      = new AudioContext();
+
+	console.log("Create context");
+	context.outStream = new Speaker({
+	  channels:   context.format.numberOfChannels,
+	  bitDepth:   context.format.bitDepth,
+	  sampleRate: context.format.sampleRate
+	});
+
+	function play(audioBuffer) {
+	  if (!audioBuffer) { return; }
+
+	  var bufferSource = context.createBufferSource();
+
+	  bufferSource.connect(context.destination);
+	  bufferSource.buffer = audioBuffer;
+	  bufferSource.loop   = false;
+	  bufferSource.start(0);
+	}
+
+	console.log("Reading files");
+	var audioData1 = fs.readFileSync(track1);
+	var audioData2 = fs.readFileSync(track2);
+
+	var audioBuffer1, audioBuffer2;
+
+	console.log("Decode track1");
+	context.decodeAudioData(audioData1, function(audioBuffer) {
+	  console.log("Decode track1 - done");
+	  audioBuffer1 = audioBuffer;
+	  if (audioBuffer1 && audioBuffer2) { playBoth(); }
+	});
+
+	console.log("Decode track2");
+	context.decodeAudioData(audioData2, function(audioBuffer) {
+	  console.log("Decode track2 - done");
+	  audioBuffer2 = audioBuffer;
+	  if (audioBuffer1 && audioBuffer2) { playBoth(); }
+	});
+
+	function playBoth() {
+	  console.log('playing track 1...');
+	  play(audioBuffer1);
+
+	  console.log('5 second delay');
+		setTimeout(function () {
+			console.log('playing track 2...');
+			play(audioBuffer2);
+		}, 5000);
+	}
+
+Great. Except...
+
+> This interface represents a memory-resident audio asset (for one-shot sounds and other short audio clips). Its format is non-interleaved IEEE 32-bit linear PCM with a nominal range of -1 -> +1. It can contain one or more channels. Typically, it would be expected that the length of the PCM data would be fairly short (usually somewhat less than a minute). For longer sounds, such as music soundtracks, streaming should be used with the audio element and MediaElementAudioSourceNode.
+
+**Source:** https://stackoverflow.com/questions/46327268/audiobuffer-not-cachable-decodeaudiodata-takes-to-long
+
 
