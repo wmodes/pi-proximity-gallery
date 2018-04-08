@@ -253,7 +253,11 @@ I need the kalmanjs module:
 
 So this is why I started updating node.
 
-## Install n module to manage node version
+If we install node 8.x, we can compile this module successfully, but :-( the other modules no longer work.
+
+
+
+## Install n module to manage node version (don't do this)
 
     $ node -v
     v4.8.2
@@ -261,7 +265,7 @@ So this is why I started updating node.
     /usr/local/bin/n -> /usr/local/lib/node_modules/n/bin/n
     n@2.1.8 /usr/local/lib/node_modules/n
 
-## Update to latest stable node release
+## Update to latest stable node release (or this)
 
     $ sudo n stable
 
