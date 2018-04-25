@@ -13,4 +13,6 @@ class Person {
     }
 }
 
-var justAGuy = new Person();
+module.exports = Person;
+
+//var justAGuy = new Person();

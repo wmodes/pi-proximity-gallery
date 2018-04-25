@@ -5,7 +5,6 @@ var AudioContext = require('web-audio-api').AudioContext;
 var Speaker = require('speaker');
 var fs = require('fs');
 
-var context;
 var bufferLoader;
 
 var tracks = [
@@ -19,21 +18,64 @@ var tracks = [
 // Globals
 //
 
-var context;
-var sounds = data.sounds;;
+var audioContext;
+var sounds;
 
 //
 // classes
 //
 
+class Audio {
+    constructor() {
+        console.log("Create context");
+        this.context = new AudioContext();
+        this.context.outStream = new Speaker({
+            channels:   this.context.format.numberOfChannels,
+            bitDepth:   this.context.format.bitDepth,
+            sampleRate: this.context.format.sampleRate
+        });
+    }
+    loadAudio(soundsData) {
+        // declare new sound object array
+        this.sounds = [];
+        // go through all the sound objs in soundsData
+        for (var i=0; i<soundsData.length;i++) {
+            // create a new sound object and store it in our local array
+            this.sounds.push(new Sound(soundsData[i]));
+        }
+        this._audioLoader();
+    }
+    _audioLoader() {
+        // instead we add these to the sounds objects
+        //var audioBuffer = Array.apply(null, Array(tracks.length)).map(function () {});
+        //var audioData = Array.apply(null, Array(tracks.length)).map(function () {});
+        console.log("Reading files");
+        for (this._curAudioId=0; this._curAudioId<this.sounds.length; this._curAudioId++) {
+            this.sounds[this._curAudioId].audioData = fs.readFileSync(this.sounds[this._curAudioId].file);
+            console.log("Decode track", this._curAudioId);
+            this.context.decodeAudioData(this.sounds[this._curAudioId].audioData, this._audioLoadHelper);
+        }
+    }
+    _audioLoadHelper(newBuffer) {
+        // can't access this. See https://stackoverflow.com/questions/20279484/how-to-access-the-correct-this-inside-a-callback
+        console.log("Decode track", this._curAudioId, "- done");
+        this.sounds[this._curAudioId].audioBuffer = newBuffer;
+        if (this.sounds[this._curAudioId].audioBuffer.every(x => x.audioBuffer)) {
+            //playAll();
+            simpleTest();
+        }
+    }
+
+}
+
 class Sound {
-    constructor(soundObj) {
+    constructor(soundObj={}) {
         this.storeSoundObj(soundObj);
     }
     storeSoundObj(soundObj) {
         var attrib = Object.keys(soundObj);
-        for (i=0; i<attrib.length; i++) {
-            this[attrib[i]] = sound[attrib[i]];
+        for (var i=0; i<attrib.length; i++) {
+            this[attrib[i]] = soundObj[attrib[i]];
         }
     }
 }
@@ -42,32 +84,18 @@ class Sound {
 // Setup
 //
 
-function prepData(sounds) {
-
-function audioSetup () {
-    console.log("Create context");
-    var context      = new AudioContext();
-    context.outStream = new Speaker({
-        channels:   context.format.numberOfChannels,
-        bitDepth:   context.format.bitDepth,
-        sampleRate: context.format.sampleRate
-    });
-}
-
-function audioLoader(sounds) {
-
+function audioLoader(soundObjArray) {
     // instead we add these to the sounds objects
     //var audioBuffer = Array.apply(null, Array(tracks.length)).map(function () {});
     //var audioData = Array.apply(null, Array(tracks.length)).map(function () {});
-
     console.log("Reading files");
-    for (audioId=0; audioId<sounds.length; audioId++) {
-        sounds[audioId].audioData = fs.readFileSync(sounds[audioId].file);
+    for (audioId=0; audioId<soundObjArray.length; audioId++) {
+        soundObjArray[audioId].audioData = fs.readFileSync(soundObjArray[audioId].file);
         console.log("Decode track", audioId);
         (function(myAudioId) {
-            context.decodeAudioData(audioData[myAudioId], function(newBuffer) {
+            audioContext.decodeAudioData(audioData[myAudioId], function(newBuffer) {
                 console.log("Decode track", myAudioId, "- done");
-                sounds[myAudioId].audioBuffer = newBuffer;
+                soundObjArray[myAudioId].audioBuffer = newBuffer;
                 if (audioBuffer.every(x => x.audioBuffer)) {
                     //playAll();
                     simpleTest();
@@ -75,12 +103,13 @@ function audioLoader(sounds) {
             });
         })(audioId);
     }
+}
 
 function play(audioBuffer) {
     if (!audioBuffer) { return; }
     console.log("Playing");
-    var bufferSource = context.createBufferSource();
-    bufferSource.connect(context.destination);
+    var bufferSource = audioContext.createBufferSource();
+    bufferSource.connect(audioContext.destination);
     bufferSource.buffer = audioBuffer;
     bufferSource.loop   = false;
     bufferSource.start(0);
@@ -89,8 +118,8 @@ function play(audioBuffer) {
 function playloop(audioBuffer) {
     if (!audioBuffer) { return; }
     console.log("Playing");
-    var bufferSource = context.createBufferSource();
-    bufferSource.connect(context.destination);
+    var bufferSource = audioContext.createBufferSource();
+    bufferSource.connect(audioContext.destination);
     bufferSource.buffer = audioBuffer;
     bufferSource.loop   = true;
     bufferSource.start(0);
@@ -99,8 +128,8 @@ function playloop(audioBuffer) {
 function pause(audioBuffer) {
     if (!audioBuffer) { return; }
     console.log("Pausing");
-    var bufferSource = context.createBufferSource();
-    bufferSource.connect(context.destination);
+    var bufferSource = audioContext.createBufferSource();
+    bufferSource.connect(audioContext.destination);
     bufferSource.buffer = audioBuffer;
     bufferSource.stop(0);
 }
@@ -202,3 +231,12 @@ function seqTest() {
     playloop(audioBuffer[3]);
     //}, 6000);
 }  
+
+
+function main() {
+    let audio = new Audio();
+    audio.loadAudio(data.sounds);
+    console.log(audio.sounds);
+}
+
+main();
