@@ -14,11 +14,9 @@ Write raspian image to sd card from MacOS
     
 Boot with monitor and keyboard to brand new raspian
 
-Authorize to local wifi
-
-Enable ssh
-
-Rename host to prox1. This gives us the ability to ssh to prox1.local. (avahi does this, and it's on by default on Raspbian)
+* Authorize to local wifi
+* Enable ssh
+* Rename host to prox1. This gives us the ability to ssh to prox1.local. (avahi does this, and it's on by default on Raspbian)
 
 At this point you can go headless. 
 
